@@ -1,6 +1,10 @@
 require './day3.rb'
 require 'rspec'
 
+RSpec.configure do |c|
+  c.filter_run_including :focus => true
+end
+
 describe Wire do
   describe '#intersect' do
     it 'R8,U5,L5,D3 and U7,R6,D4,L4' do

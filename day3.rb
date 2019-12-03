@@ -22,7 +22,7 @@ class Wire
       else
         raise "What direction is #{direction}?!"
       end
-      @runs << WireRun.new(start_x, start_y, x, y, steps)
+      @runs << WireRun.new(start_x, start_y, x, y, direction, steps)
       steps += length
     end
   end
@@ -37,17 +37,27 @@ class Wire
     intersections(wire2).collect { |x,y| x.abs + y.abs }.min
   end
 
+  def intersecting_wire_runs(wire2)
+    @runs.flat_map do |run|
+      wire2.runs.select { |run2| run.intersection(run2) }.collect { |run2| [run, run2] }
+    end
+  end
+
   def intersect_minimum_signal_delay(wire2)
-    # TODO need intersections_by_steps
-    intersections_by_steps(wire2).collect { |steps1, steps2| steps1 + steps2 }.min
+    intersecting_wire_runs(wire2).collect do |run1, run2|
+      point = run1.intersection(run2)
+      # byebug
+      run1.steps_at(point) + run2.steps_at(point)
+    end.min
   end
 end
 
 class WireRun
   attr_reader :x1, :y1, :x2, :y2
-  def initialize(x1, y1, x2, y2, previous_steps)
+  def initialize(x1, y1, x2, y2, direction, previous_steps)
     @x1, @y1, @x2, @y2 = x1, y1, x2, y2
     @previous_steps = previous_steps
+    @direction = direction
   end
 
   def to_s
@@ -58,12 +68,27 @@ class WireRun
     @x1 == @x2
   end
 
-  # def horizontal?
-  #   @y1 == @y2
-  # end
-
   def central_port?
     (@x1 == 0 && @y1 == 0) || (@x2 == 0 && @y2 == 0)
+  end
+
+  def steps_at(point)
+    x, y = point
+    raise "does not cross" if vertical? && !(@x1 == x && length_includes?(@y1,@y2,y))
+    raise "does not cross" if !vertical? && !(@y1 == y && length_includes?(@x1,@x2,x))
+    # do negative values matter?
+    steps_so_far =
+      case @direction
+      when 'U'
+        y - @y1
+      when 'D'
+        @y1 - y
+      when 'L'
+        @x1 - x
+      when 'R'
+        x - @x1
+      end
+    @previous_steps + steps_so_far
   end
 
   def intersection(run2)
@@ -93,6 +118,7 @@ if __FILE__ == $0
   wire1 = Wire.new(DATA.readline)
   wire2 = Wire.new(DATA.readline)
   print "Shortest Manhattan distance for intersections: #{wire1.intersect(wire2)}\n"
+  print "Fewest combined steps for intersections: #{wire1.intersect_minimum_signal_delay(wire2)}\n"
 end
 
 __END__
