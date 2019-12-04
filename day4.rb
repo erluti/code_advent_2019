@@ -4,7 +4,23 @@ class PasscodeVerifier
   end
 
   def is_valid?
-    nil
+    return false if @passcode/100000 < 1
+    code = @passcode.dup
+    digits = []
+    while code > 10
+      digits.unshift(code%10)
+      code /= 10
+    end
+    last = code
+    double = false
+    digits.each do |i|
+      return false if i > last
+      unless double
+        double = i == last
+      end
+      last = i
+    end
+    double #everything else is valid, return wether or not the number contains a double
   end
 end
 
