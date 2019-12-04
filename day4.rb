@@ -1,3 +1,5 @@
+require 'byebug'
+
 class PasscodeVerifier
   def initialize(passcode)
     @passcode = passcode
@@ -14,7 +16,7 @@ class PasscodeVerifier
     last = code
     double = false
     digits.each do |i|
-      return false if i > last
+      return false if i < last
       unless double
         double = i == last
       end

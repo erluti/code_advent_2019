@@ -16,5 +16,8 @@ describe PasscodeVerifier do
     it 'should be false for 123789' do
       expect(PasscodeVerifier.new(123789).is_valid?).to eq false
     end
+    it 'should be true for 123788' do
+      expect(PasscodeVerifier.new(123788).is_valid?).to eq true
+    end
   end
 end
