@@ -7,6 +7,7 @@ class PasscodeVerifier
 
   def is_valid?
     return false if @passcode/100000 < 1
+    # setup array of digits
     code = @passcode.dup
     digits = []
     while code > 10
@@ -14,15 +15,18 @@ class PasscodeVerifier
       code /= 10
     end
     last = code
+
+    # test digits
     double = false
+    passcode_string = @passcode.to_s
     digits.each do |i|
       return false if i < last
       unless double
-        double = i == last
+        double = passcode_string.match(/^[^#{i}]*#{i}{2}[^#{i}]*$/)
       end
       last = i
     end
-    double #everything else is valid, return wether or not the number contains a double
+    !!double #everything else is valid, return wether or not the number contains a double
   end
 end
 
