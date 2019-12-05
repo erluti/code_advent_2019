@@ -10,7 +10,7 @@ class IntcodeProgram
 
   def run
     position = 0 # aka instruction pointer
-    opcode = @intcode[0]
+    opcode = @intcode[position]
     while opcode != 99
       instruction_length = 0
       case opcode
@@ -20,12 +20,14 @@ class IntcodeProgram
       when 2
         write_by_pointer(values(position).reduce(&:*), position + 3)
         instruction_length = 4
+      when 3
+        write_by_pointer(@input, value_by_pointer(position + 1))
+        instruction_length = 2
       else
         raise "#{opcode} not an opcode!"
       end
       position += instruction_length
       opcode = @intcode[position]
-      # p "result: #{@intcode.join(',')}"
     end
     @intcode.join(',')
   end
