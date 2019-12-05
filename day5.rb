@@ -23,6 +23,9 @@ class IntcodeProgram
       when 3
         write_by_pointer(@input, value_by_pointer(position + 1))
         instruction_length = 2
+      when 4
+        output_value(value_by_pointer(position + 1))
+        instruction_length = 2
       else
         raise "#{opcode} not an opcode!"
       end
@@ -40,6 +43,10 @@ class IntcodeProgram
   def write_by_pointer(value, position)
     p_out = @intcode[position]
     @intcode[p_out] = value
+  end
+
+  def output_value(value)
+    @output << value
   end
 
   def values(position)
