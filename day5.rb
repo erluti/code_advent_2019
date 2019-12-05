@@ -11,9 +11,9 @@ class IntcodeProgram
   def run
     position = 0 # aka instruction pointer
     opcode = @intcode[position]
-    while opcode != 99
+    while operation(opcode) != 99
       instruction_length = 0
-      case opcode
+      case operation(opcode)
       when 1
         write_by_pointer(values(position).sum, position + 3)
         instruction_length = 4
@@ -33,6 +33,18 @@ class IntcodeProgram
       opcode = @intcode[position]
     end
     @intcode.join(',')
+  end
+
+  def operation(opcode)
+    opcode%100
+  end
+
+  def arg_type(opcode, argument_index)
+    arg_modifiers = opcode/100
+    (1..argument_index).each do
+      arg_modifiers /= 10
+    end
+    arg_modifiers % 10 == 1 ? :position : :immediate
   end
 
   def value_by_pointer(position)
