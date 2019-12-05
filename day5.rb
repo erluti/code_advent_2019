@@ -1,3 +1,5 @@
+require 'byebug'
+
 class IntcodeProgram
   attr_reader :intcode
   attr_reader :output
@@ -15,18 +17,21 @@ class IntcodeProgram
       instruction_length = 0
       case operation(opcode)
       when 1
-        v1, v2 = value_by_pointer(position + 1), value_by_pointer(position + 2)
-        write_by_pointer(v1 + v2, position + 3)
+        v1 = get_argument(position, opcode, 0)
+        v2 = get_argument(position, opcode, 1)
+        put_result(v1 + v2, position, opcode, 2)
         instruction_length = 4
       when 2
-        v1, v2 = value_by_pointer(position + 1), value_by_pointer(position + 2)
-        write_by_pointer(v1 * v2, position + 3)
+        v1 = get_argument(position, opcode, 0)
+        v2 = get_argument(position, opcode, 1)
+        put_result(v1 * v2, position, opcode, 2)
         instruction_length = 4
       when 3
-        write_by_pointer(@input, value_by_pointer(position + 1))
+        put_result(@input, position, opcode, 0)
         instruction_length = 2
       when 4
-        output_value(value_by_pointer(position + 1))
+        value = get_argument(position, opcode, 0)
+        output_value(value)
         instruction_length = 2
       else
         raise "#{opcode} not an opcode!"
@@ -41,12 +46,16 @@ class IntcodeProgram
     opcode%100
   end
 
+  def get_argument(position, opcode, argument_index)
+    value_at(position + 1 + argument_index, parameter_mode(opcode, argument_index))
+  end
+
   def parameter_mode(opcode, argument_index)
     arg_modifiers = opcode/100
     (1..argument_index).each do
       arg_modifiers /= 10
     end
-    arg_modifiers % 10 == 1 ? :position : :immediate
+    arg_modifiers % 10 == 1 ? :immediate : :position
   end
 
   def value_at(position, mode)
@@ -66,9 +75,16 @@ class IntcodeProgram
     @intcode[p]
   end
 
-  def write_by_pointer(value, position)
-    p_out = @intcode[position]
-    @intcode[p_out] = value
+  def put_result(result, position, opcode, argument_index)
+    write_at(result, position + 1 + argument_index, parameter_mode(opcode, argument_index))
+  end
+
+  def write_at(value, position, mode)
+    location = position
+    if mode == :position
+      location = @intcode[position]
+    end
+    @intcode[location] = value
   end
 
   def output_value(value)

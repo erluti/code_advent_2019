@@ -1,6 +1,10 @@
 require './day5.rb'
 require 'rspec'
 
+# RSpec.configure do |c|
+#   c.filter_run_including :focus => true
+# end
+
 describe IntcodeProgram do
   context 'day2 tests' do
     it '1,0,0,0,99 becomes 2,0,0,0,99' do
@@ -35,5 +39,15 @@ describe IntcodeProgram do
     subject = IntcodeProgram.new('4,2,99')
     subject.run
     expect(subject.output).to eq [99]
+  end
+
+  describe '#parameter_mode' do
+    subject { IntcodeProgram.new('') }
+    it 'should return :immediate for a 1' do
+      expect(subject.parameter_mode(1003, 1)).to eq :immediate
+    end
+    it 'should return :position for a 0' do
+      expect(subject.parameter_mode(10003, 1)).to eq :position
+    end
   end
 end
