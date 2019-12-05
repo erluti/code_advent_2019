@@ -3,6 +3,7 @@ require 'byebug'
 class IntcodeProgram
   attr_reader :intcode
   attr_reader :output
+  attr_reader :diagnostic_success
 
   def initialize(intcode, input:nil)
     @intcode = intcode.split(',').map(&:to_i) # AKA memory
@@ -39,6 +40,7 @@ class IntcodeProgram
       position += instruction_length
       opcode = @intcode[position]
     end
+    # REVIEW do I need to test for diagnostic success?
     @intcode.join(',')
   end
 
@@ -98,7 +100,9 @@ end
 
 if __FILE__ == $0
   diagnostic_program = DATA.readline
-  IntcodeProgram.new(diagnostic_program, input: 1)
+  program = IntcodeProgram.new(diagnostic_program, input: 1)
+  program.run
+  print "\nOutput: #{program.output}\n\n"
 end
 
 __END__
