@@ -15,10 +15,12 @@ class IntcodeProgram
       instruction_length = 0
       case operation(opcode)
       when 1
-        write_by_pointer(values(position).sum, position + 3)
+        v1, v2 = value_by_pointer(position + 1), value_by_pointer(position + 2)
+        write_by_pointer(v1 + v2, position + 3)
         instruction_length = 4
       when 2
-        write_by_pointer(values(position).reduce(&:*), position + 3)
+        v1, v2 = value_by_pointer(position + 1), value_by_pointer(position + 2)
+        write_by_pointer(v1 * v2, position + 3)
         instruction_length = 4
       when 3
         write_by_pointer(@input, value_by_pointer(position + 1))
@@ -39,12 +41,24 @@ class IntcodeProgram
     opcode%100
   end
 
-  def arg_type(opcode, argument_index)
+  def parameter_mode(opcode, argument_index)
     arg_modifiers = opcode/100
     (1..argument_index).each do
       arg_modifiers /= 10
     end
     arg_modifiers % 10 == 1 ? :position : :immediate
+  end
+
+  def value_at(position, mode)
+    if mode == :position
+      value_by_pointer(position)
+    else
+      value(position)
+    end
+  end
+
+  def value(position)
+    @intcode[position]
   end
 
   def value_by_pointer(position)
@@ -59,10 +73,6 @@ class IntcodeProgram
 
   def output_value(value)
     @output << value
-  end
-
-  def values(position)
-    [value_by_pointer(position + 1), value_by_pointer(position + 2)]
   end
 
   def prime_data(position:, value:)
