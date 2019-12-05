@@ -100,7 +100,9 @@ end
 
 if __FILE__ == $0
   diagnostic_program = DATA.readline
-  program = IntcodeProgram.new(diagnostic_program, input: 1)
+  air_conditioner_unit_code = 1 # use for part 1 input
+  thermal_radiators_code = 5 # use for part 2 input
+  program = IntcodeProgram.new(diagnostic_program, input: thermal_radiators_code)
   program.run
   print "\nOutput: #{program.output}\n\n"
 end
