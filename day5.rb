@@ -11,32 +11,37 @@ class IntcodeProgram
   def run
     position = 0 # aka instruction pointer
     opcode = @intcode[0]
-    # p "input: #{@intcode.join(',')}"
     while opcode != 99
-      # p "process: #{@intcode.slice(position, 4)}"
+      instruction_length = 0
       case opcode
       when 1
-        output(values(position).sum, position)
+        write_by_pointer(values(position).sum, position + 3)
+        instruction_length = 4
       when 2
-        output(values(position).reduce(&:*), position)
+        write_by_pointer(values(position).reduce(&:*), position + 3)
+        instruction_length = 4
       else
         raise "#{opcode} not an opcode!"
       end
-      position += 4
+      position += instruction_length
       opcode = @intcode[position]
       # p "result: #{@intcode.join(',')}"
     end
     @intcode.join(',')
   end
 
-  def values(position)
-    p1, p2 = [@intcode[position + 1], @intcode[position + 2]]
-    [@intcode[p1], @intcode[p2]]
+  def value_by_pointer(position)
+    p = @intcode[position]
+    @intcode[p]
   end
 
-  def output(value, position)
-    p_out = @intcode[position + 3]
+  def write_by_pointer(value, position)
+    p_out = @intcode[position]
     @intcode[p_out] = value
+  end
+
+  def values(position)
+    [value_by_pointer(position + 1), value_by_pointer(position + 2)]
   end
 
   def prime_data(position:, value:)
