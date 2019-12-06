@@ -22,12 +22,36 @@ describe Orbiter do
         K)L
       MAP
     end
+
     describe '.connect_orbits' do
       subject { Orbiter.connect_orbits(example_map) }
       it 'should should return a hash of connected Orbiters' do
         expect(subject['COM'].orbiting).to be_nil
         expect(subject['COM'].orbiters).to eq [subject['B']]
-        expect(subject['COM'].orbiters).to eq [subject['B']]
+        expect(subject['B'].orbiters).to eq [subject['C'], subject['G']]
+        expect(subject['G'].orbiters).to eq [subject['H']]
+        expect(subject['H'].orbiters).to eq []
+        expect(subject['C'].orbiters).to eq [subject['D']]
+        expect(subject['D'].orbiters).to eq [subject['E'], subject['I']]
+        expect(subject['I'].orbiters).to eq []
+        expect(subject['E'].orbiters).to eq [subject['F'], subject['J']]
+        expect(subject['F'].orbiters).to eq []
+        expect(subject['J'].orbiters).to eq [subject['K']]
+        expect(subject['K'].orbiters).to eq [subject['L']]
+        expect(subject['L'].orbiters).to eq []
+      end
+    end
+
+    describe '#orbit_counts' do
+      let(:orbits) { Orbiter.connect_orbits(example_map) }
+      it 'should be 3 for example orbit D' do
+        expect(orbits['D'].orbit_counts).to eq 3
+      end
+      it 'should be 7 for example orbit L' do
+        expect(orbits['L'].orbit_counts).to eq 7
+      end
+      it 'should be 0 for Center Of Mass (COM)' do
+        expect(orbits['COM'].orbit_counts).to eq 0
       end
     end
   end

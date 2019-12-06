@@ -1,7 +1,9 @@
+require 'byebug'
+
 class Orbiter
   def self.connect_orbits(map)
     orbiters = {}
-    map.split('\n').each do |connection|
+    map.split("\n").each do |connection|
       a,b = connection.split(')')
       orbiter_a =
         if orbiters.keys.include?(a)
@@ -32,6 +34,9 @@ class Orbiter
   end
   def set_orbiting(planet_i_orbit)
     @orbiting = planet_i_orbit
+  end
+  def orbit_counts(parent_counts = 0)
+    0
   end
 end
 
