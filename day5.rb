@@ -41,6 +41,12 @@ class IntcodeProgram
           jump_location = get_argument(position, opcode, 1)
         end
         instruction_length = 3
+      when 6 # jump-if-false
+        value = get_argument(position, opcode, 0)
+        if value == 0
+          jump_location = get_argument(position, opcode, 1)
+        end
+        instruction_length = 3
       else
         raise "#{opcode} not an opcode!"
       end
