@@ -47,6 +47,18 @@ class IntcodeProgram
           jump_location = get_argument(position, opcode, 1)
         end
         instruction_length = 3
+      when 7 # less than
+        v1 = get_argument(position, opcode, 0)
+        v2 = get_argument(position, opcode, 1)
+        result = (v1 < v2 ? 1 : 0)
+        put_result(result, position, opcode, 2)
+        instruction_length = 4
+      when 8 # equals
+        v1 = get_argument(position, opcode, 0)
+        v2 = get_argument(position, opcode, 1)
+        result = (v1 == v2 ? 1 : 0)
+        put_result(result, position, opcode, 2)
+        instruction_length = 4
       else
         raise "#{opcode} not an opcode!"
       end
