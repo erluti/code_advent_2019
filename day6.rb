@@ -35,8 +35,9 @@ class Orbiter
   def set_orbiting(planet_i_orbit)
     @orbiting = planet_i_orbit
   end
-  def orbit_counts(parent_counts = 0)
-    0
+  def distance_from_COM
+    return 0 unless @orbiting
+    return 1 + @orbiting.distance_from_COM
   end
 end
 

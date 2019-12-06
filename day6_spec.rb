@@ -42,16 +42,16 @@ describe Orbiter do
       end
     end
 
-    describe '#orbit_counts' do
+    describe '#distance_from_COM' do
       let(:orbits) { Orbiter.connect_orbits(example_map) }
       it 'should be 3 for example orbit D' do
-        expect(orbits['D'].orbit_counts).to eq 3
+        expect(orbits['D'].distance_from_COM).to eq 3
       end
       it 'should be 7 for example orbit L' do
-        expect(orbits['L'].orbit_counts).to eq 7
+        expect(orbits['L'].distance_from_COM).to eq 7
       end
       it 'should be 0 for Center Of Mass (COM)' do
-        expect(orbits['COM'].orbit_counts).to eq 0
+        expect(orbits['COM'].distance_from_COM).to eq 0
       end
     end
   end
