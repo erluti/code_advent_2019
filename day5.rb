@@ -18,23 +18,29 @@ class IntcodeProgram
       instruction_length = 0
       jump_location = nil
       case operation(opcode)
-      when 1
+      when 1 # add
         v1 = get_argument(position, opcode, 0)
         v2 = get_argument(position, opcode, 1)
         put_result(v1 + v2, position, opcode, 2)
         instruction_length = 4
-      when 2
+      when 2 # multiply
         v1 = get_argument(position, opcode, 0)
         v2 = get_argument(position, opcode, 1)
         put_result(v1 * v2, position, opcode, 2)
         instruction_length = 4
-      when 3
+      when 3 # input
         put_result(@input, position, opcode, 0)
         instruction_length = 2
-      when 4
+      when 4 # output
         value = get_argument(position, opcode, 0)
         output_value(value)
         instruction_length = 2
+      when 5 # jump-if-true
+        value = get_argument(position, opcode, 0)
+        if value != 0
+          jump_location = get_argument(position, opcode, 1)
+        end
+        instruction_length = 3
       else
         raise "#{opcode} not an opcode!"
       end
