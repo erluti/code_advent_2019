@@ -1,26 +1,43 @@
 require 'byebug'
 
-class Orbiter
-  def self.connect_orbits(map)
-    orbiters = {}
-    map.split("\n").each do |connection|
+class OrbitMap
+  def self.connect_orbits(map_string)
+    map = OrbitMap.new
+    map_string.split("\n").each do |connection|
       a,b = connection.split(')')
-      orbiter_a =
-        if orbiters.keys.include?(a)
-          orbiters[a]
-        else
-          orbiters[a] = Orbiter.new(a)
-        end
-      orbiter_b =
-        if orbiters.keys.include?(b)
-          orbiters[b]
-        else
-          orbiters[b] = Orbiter.new(b,orbiter_a)
-        end
-      orbiter_a.add_orbiter(orbiter_b)
+      map.connect(a,b)
     end
-    orbiters
+    map
   end
+
+  attr_reader :orbiters
+
+  def initialize
+    @orbiters = {}
+  end
+
+  def connect(root_name, child_name)
+    orbiter_a =
+      if @orbiters.keys.include?(root_name)
+        @orbiters[root_name]
+      else
+        @orbiters[root_name] = Orbiter.new(root_name)
+      end
+    orbiter_b =
+      if @orbiters.keys.include?(child_name)
+        @orbiters[child_name]
+      else
+        @orbiters[child_name] = Orbiter.new(child_name,orbiter_a)
+      end
+    orbiter_a.add_orbiter(orbiter_b)
+  end
+
+  def [](orbiter_name)
+    @orbiters[orbiter_name]
+  end
+end
+
+class Orbiter
   attr_reader :orbiting, :orbiters
   def initialize(name,orbiting=nil)
     @orbiting = orbiting
@@ -43,11 +60,8 @@ end
 
 if __FILE__ == $0
   diagnostic_program = DATA.readline
-  air_conditioner_unit_code = 1 # use for part 1 input
-  thermal_radiators_code = 5 # use for part 2 input
-  program = IntcodeProgram.new(diagnostic_program, input: thermal_radiators_code)
-  program.run
-  print "\nOutput: #{program.output}\n\n"
+  byebug
+  p "done"
 end
 
 __END__

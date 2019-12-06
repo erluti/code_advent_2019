@@ -5,7 +5,7 @@ require 'rspec'
 #   c.filter_run_including :focus => true
 # end
 
-describe Orbiter do
+describe OrbitMap do
   describe 'example map' do
     let(:example_map) do
       <<~MAP
@@ -24,7 +24,7 @@ describe Orbiter do
     end
 
     describe '.connect_orbits' do
-      subject { Orbiter.connect_orbits(example_map) }
+      subject { OrbitMap.connect_orbits(example_map) }
       it 'should should return a hash of connected Orbiters' do
         expect(subject['COM'].orbiting).to be_nil
         expect(subject['COM'].orbiters).to eq [subject['B']]
@@ -41,9 +41,29 @@ describe Orbiter do
         expect(subject['L'].orbiters).to eq []
       end
     end
+  end
+end
+
+describe Orbiter do
+  describe 'example map' do
+    let(:example_map) do
+      <<~MAP
+        COM)B
+        B)C
+        C)D
+        D)E
+        E)F
+        B)G
+        G)H
+        D)I
+        E)J
+        J)K
+        K)L
+      MAP
+    end
 
     describe '#distance_from_COM' do
-      let(:orbits) { Orbiter.connect_orbits(example_map) }
+      let(:orbits) { OrbitMap.connect_orbits(example_map) }
       it 'should be 3 for example orbit D' do
         expect(orbits['D'].distance_from_COM).to eq 3
       end
