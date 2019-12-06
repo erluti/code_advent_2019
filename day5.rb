@@ -16,6 +16,7 @@ class IntcodeProgram
     opcode = @intcode[position]
     while operation(opcode) != 99
       instruction_length = 0
+      jump_location = nil
       case operation(opcode)
       when 1
         v1 = get_argument(position, opcode, 0)
@@ -37,7 +38,7 @@ class IntcodeProgram
       else
         raise "#{opcode} not an opcode!"
       end
-      position += instruction_length
+      position = jump_location || (position + instruction_length)
       opcode = @intcode[position]
     end
     # REVIEW do I need to test for diagnostic success?
