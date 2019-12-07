@@ -51,8 +51,9 @@ class OrbitMap
 end
 
 class Orbiter
-  attr_reader :orbiting, :orbiters
+  attr_reader :name, :orbiting, :orbiters
   def initialize(name,orbiting=nil)
+    @name = name
     @orbiting = orbiting
     @orbiters = []
   end
@@ -68,6 +69,10 @@ class Orbiter
   def distance_from_COM
     return 0 unless @orbiting
     return 1 + @orbiting.distance_from_COM
+  end
+  def path_to_COM
+    return [name] unless @orbiting
+    [name] + @orbiting.path_to_COM
   end
 end
 

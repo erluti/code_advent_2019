@@ -6,6 +6,30 @@ require 'rspec'
 # end
 
 describe OrbitMap do
+  describe 'part 2 example map' do
+    let(:example_map2) do
+      <<~MAP
+        COM)B
+        B)C
+        C)D
+        D)E
+        E)F
+        B)G
+        G)H
+        D)I
+        E)J
+        J)K
+        K)L
+        K)YOU
+        I)SAN
+      MAP
+    end
+
+    subject { OrbitMap.connect_orbits(example_map2) }
+    describe '#move_node'
+    describe '#join_orbit'
+  end
+
   describe 'example map' do
     let(:example_map) do
       <<~MAP
@@ -90,6 +114,18 @@ describe Orbiter do
       end
       it 'should be 0 for Center Of Mass (COM)' do
         expect(orbits['COM'].distance_from_COM).to eq 0
+      end
+    end
+
+    context 'part 2 -' do
+      describe '#path_to_COM' do
+        let(:orbit_map) { OrbitMap.connect_orbits(example_map) }
+        it 'should be ["COM"] for COM' do
+          expect(orbit_map['COM'].path_to_COM).to eq ["COM"]
+        end
+        it 'should be ["H", "G", "B", "COM"] for H' do
+          expect(orbit_map['H'].path_to_COM).to eq ["H", "G", "B", "COM"]
+        end
       end
     end
   end
