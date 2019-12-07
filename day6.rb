@@ -16,24 +16,33 @@ class OrbitMap
     @orbiters = {}
   end
 
-  def connect(root_name, child_name)
-    orbiter_a =
-      if @orbiters.keys.include?(root_name)
-        @orbiters[root_name]
+  def connect(parent_name, child_name)
+    parent =
+      if @orbiters.keys.include?(parent_name)
+        @orbiters[parent_name]
       else
-        @orbiters[root_name] = Orbiter.new(root_name)
+        @orbiters[parent_name] = Orbiter.new(parent_name)
       end
-    orbiter_b =
+    child =
       if @orbiters.keys.include?(child_name)
         @orbiters[child_name]
       else
-        @orbiters[child_name] = Orbiter.new(child_name,orbiter_a)
+        @orbiters[child_name] = Orbiter.new(child_name,parent)
       end
-    orbiter_a.add_orbiter(orbiter_b)
+    parent.add_orbiter(child)
+  end
+
+  def read_connection(entry_line)
+    parent, child = entry_line.strip.split(')')
+    connect(parent, child)
   end
 
   def [](orbiter_name)
     @orbiters[orbiter_name]
+  end
+
+  def keys
+    @orbiters.keys
   end
 end
 

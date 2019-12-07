@@ -41,6 +41,17 @@ describe OrbitMap do
         expect(subject['L'].orbiters).to eq []
       end
     end
+
+    describe '#read_connection' do
+      it 'should accept each line of the example map' do
+        subject = OrbitMap.new
+        reader = StringIO.new(example_map)
+        reader.each_line do |entry|
+          subject.read_connection(entry)
+        end
+        expect(subject.keys).to match ['COM'] + ('B'..'L').to_a
+      end
+    end
   end
 end
 
