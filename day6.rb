@@ -17,7 +17,7 @@ class OrbitMap
   end
 
   def total_orbits
-    -1
+    @orbiters.values.sum { |orbiter| orbiter.distance_from_COM }
   end
 
   def connect(parent_name, child_name)
