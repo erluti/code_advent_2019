@@ -16,6 +16,10 @@ class OrbitMap
     @orbiters = {}
   end
 
+  def total_orbits
+    -1
+  end
+
   def connect(parent_name, child_name)
     parent =
       if @orbiters.keys.include?(parent_name)
@@ -68,9 +72,11 @@ class Orbiter
 end
 
 if __FILE__ == $0
-  diagnostic_program = DATA.readline
-  byebug
-  p "done"
+  map = OrbitMap.new
+  DATA.each_line do |entry|
+    map.read_connection(entry)
+  end
+  print "\nTotal Orbits: #{map.total_orbits}\n\n"
 end
 
 __END__

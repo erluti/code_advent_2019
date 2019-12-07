@@ -24,21 +24,21 @@ describe OrbitMap do
     end
 
     describe '.connect_orbits' do
-      subject { OrbitMap.connect_orbits(example_map) }
       it 'should should return a hash of connected Orbiters' do
-        expect(subject['COM'].orbiting).to be_nil
-        expect(subject['COM'].orbiters).to eq [subject['B']]
-        expect(subject['B'].orbiters).to eq [subject['C'], subject['G']]
-        expect(subject['G'].orbiters).to eq [subject['H']]
-        expect(subject['H'].orbiters).to eq []
-        expect(subject['C'].orbiters).to eq [subject['D']]
-        expect(subject['D'].orbiters).to eq [subject['E'], subject['I']]
-        expect(subject['I'].orbiters).to eq []
-        expect(subject['E'].orbiters).to eq [subject['F'], subject['J']]
-        expect(subject['F'].orbiters).to eq []
-        expect(subject['J'].orbiters).to eq [subject['K']]
-        expect(subject['K'].orbiters).to eq [subject['L']]
-        expect(subject['L'].orbiters).to eq []
+        map = OrbitMap.connect_orbits(example_map)
+        expect(map['COM'].orbiting).to be_nil
+        expect(map['COM'].orbiters).to eq [map['B']]
+        expect(map['B'].orbiters).to eq [map['C'], map['G']]
+        expect(map['G'].orbiters).to eq [map['H']]
+        expect(map['H'].orbiters).to eq []
+        expect(map['C'].orbiters).to eq [map['D']]
+        expect(map['D'].orbiters).to eq [map['E'], map['I']]
+        expect(map['I'].orbiters).to eq []
+        expect(map['E'].orbiters).to eq [map['F'], map['J']]
+        expect(map['F'].orbiters).to eq []
+        expect(map['J'].orbiters).to eq [map['K']]
+        expect(map['K'].orbiters).to eq [map['L']]
+        expect(map['L'].orbiters).to eq []
       end
     end
 
@@ -50,6 +50,13 @@ describe OrbitMap do
           subject.read_connection(entry)
         end
         expect(subject.keys).to match ['COM'] + ('B'..'L').to_a
+      end
+    end
+
+    describe '#total_orbits' do
+      subject { OrbitMap.connect_orbits(example_map) }
+      it 'should equal 42' do
+        expect(subject.total_orbits).to eq 42
       end
     end
   end
