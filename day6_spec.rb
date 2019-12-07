@@ -26,7 +26,15 @@ describe OrbitMap do
     end
 
     subject { OrbitMap.connect_orbits(example_map2) }
-    describe '#move_node'
+    describe '#buddy_node' do
+      it 'should connect an orbiter do a distant orbiter' do
+        subject.buddy_node(subject['YOU'], subject['SAN'])
+        expect(subject['YOU'].orbiting).to eq subject['SAN'].orbiting
+      end
+      it 'should return the minimum number of moves to connect them' do
+        expect(subject.buddy_node(subject['YOU'], subject['SAN'])).to eq 4
+      end
+    end
     describe '#join_orbit' do
       it "should add child to a parent's parent" do
         subject.join_orbit(subject['H'],subject['B'])

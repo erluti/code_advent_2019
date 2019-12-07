@@ -20,6 +20,25 @@ class OrbitMap
     @orbiters.values.sum { |orbiter| orbiter.distance_from_COM }
   end
 
+  def buddy_node(orbiter1, orbiter2)
+    path1 = orbiter1.path_to_COM - [orbiter1.name]
+    path2 = orbiter2.path_to_COM - [orbiter2.name]
+    overlap = path1 & path2
+    pivot = overlap.last
+    path1 -= overlap
+    path2 -= overlap
+    moves = 0
+    (path1 - [orbiter1.orbiting.name] + [pivot]).each do |new_parent|
+      join_orbit(orbiter1, @orbiters[new_parent])
+      moves +=1
+    end
+    path2.reverse.each do |new_parent|
+      join_orbit(orbiter1, @orbiters[new_parent])
+      moves +=1
+    end
+    moves
+  end
+
   def join_orbit(orbiter, new_parent)
     orbiter.orbiting.drop_orbiter(orbiter)
     new_parent.add_orbiter(orbiter)
@@ -86,7 +105,11 @@ class Orbiter
     "((#{name}))"
   end
   def to_s
-    "#{@orbiting.name} -> ((#{name})) -> [#{@orbiters.map(&:name).join(',')}]"
+    str = "((#{name})) -> [#{@orbiters.map(&:name).join(',')}]"
+    if @orbiting
+      str = "#{@orbiting.name} -> #{str}"
+    end
+    str
   end
 end
 
