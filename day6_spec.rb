@@ -6,7 +6,7 @@ require 'rspec'
 # end
 
 describe OrbitMap do
-  describe 'part 2 example map' do
+  describe 'part 2 - example map' do
     let(:example_map2) do
       <<~MAP
         COM)B
@@ -27,7 +27,20 @@ describe OrbitMap do
 
     subject { OrbitMap.connect_orbits(example_map2) }
     describe '#move_node'
-    describe '#join_orbit'
+    describe '#join_orbit' do
+      it "should add child to a parent's parent" do
+        subject.join_orbit(subject['H'],subject['B'])
+        expect(subject['H'].orbiting).to eq subject['B']
+        expect(subject['G'].orbiters).to be_empty
+        expect(subject['B'].orbiters).to include(subject['H'], subject['G'])
+      end
+      it 'should make a sibling into a child' do
+        subject.join_orbit(subject['I'], subject['E'])
+        expect(subject['I'].orbiting).to eq subject['E']
+        expect(subject['D'].orbiters).to eq [subject['E']]
+        expect(subject['E'].orbiters).to include(subject['I'], subject['J'], subject['F'])
+      end
+    end
   end
 
   describe 'example map' do

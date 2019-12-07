@@ -20,6 +20,11 @@ class OrbitMap
     @orbiters.values.sum { |orbiter| orbiter.distance_from_COM }
   end
 
+  def join_orbit(orbiter, new_parent)
+    orbiter.orbiting.drop_orbiter(orbiter)
+    new_parent.add_orbiter(orbiter)
+  end
+
   def connect(parent_name, child_name)
     parent =
       if @orbiters.keys.include?(parent_name)
@@ -59,9 +64,12 @@ class Orbiter
   end
   def add_orbiter(orbiter)
     @orbiters << orbiter
-    if orbiter.orbiting.nil?
+    if orbiter.orbiting != self
       orbiter.set_orbiting(self)
     end
+  end
+  def drop_orbiter(orbiter)
+    @orbiters.delete(orbiter)
   end
   def set_orbiting(planet_i_orbit)
     @orbiting = planet_i_orbit
@@ -73,6 +81,12 @@ class Orbiter
   def path_to_COM
     return [name] unless @orbiting
     [name] + @orbiting.path_to_COM
+  end
+  def inspect
+    "((#{name}))"
+  end
+  def to_s
+    "#{@orbiting.name} -> ((#{name})) -> [#{@orbiters.map(&:name).join(',')}]"
   end
 end
 
