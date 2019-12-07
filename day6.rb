@@ -118,7 +118,8 @@ if __FILE__ == $0
   DATA.each_line do |entry|
     map.read_connection(entry)
   end
-  print "\nTotal Orbits: #{map.total_orbits}\n\n"
+  print "\nTotal Orbits: #{map.total_orbits}\n"
+  print "\nMoves to buddy YOU and SANTA: #{map.buddy_node(map['YOU'], map['SAN'])}\n\n"
 end
 
 __END__
