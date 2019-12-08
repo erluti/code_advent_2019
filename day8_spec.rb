@@ -12,8 +12,11 @@ describe 'part 1 sample sequence' do
     it 'should create two layers in a 3x2' do
       expect(subject.layers.count).to eq 2
     end
-    it 'can fidn the layer with the most 0s' do
+    it 'can find the layer with the most 0s' do
       expect(subject.layer_with_most('0').sequence).to eq '789012'
+    end
+    it 'can find the layer with the least 0s' do
+      expect(subject.layer_with_least('0').sequence).to eq '123456'
     end
   end
   describe Layer do
@@ -42,5 +45,14 @@ describe SpaceImageFormat do
   it 'should be able to find a layer with the most zeros for width 1' do
     subject = SpaceImageFormat.new(height: 3, width: 1, sequence: '000120102011')
     expect(subject.layer_with_most('0').sequence).to eq '000'
+  end
+
+  it 'should be able to find a layer with the least zeros for height 1' do
+    subject = SpaceImageFormat.new(height: 1, width: 2, sequence: '00020111')
+    expect(subject.layer_with_least('0').sequence).to eq '11'
+  end
+  it 'should be able to find a layer with the least zeros for width 1' do
+    subject = SpaceImageFormat.new(height: 3, width: 1, sequence: '000120102111')
+    expect(subject.layer_with_least('0').sequence).to eq '111'
   end
 end

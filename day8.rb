@@ -18,6 +18,10 @@ class SpaceImageFormat
   def layer_with_most(value)
     @layers.max { |layer1, layer2| layer1.count(value) <=> layer2.count(value) }
   end
+
+  def layer_with_least(value)
+    @layers.min { |layer1, layer2| layer1.count(value) <=> layer2.count(value) }
+  end
 end
 
 class Layer
@@ -29,7 +33,7 @@ class Layer
     @counts = {}
 
     index = 0
-    while index < @sequence.length - 1
+    while index < @sequence.length
       row_sequence = sequence[index..(index + @width - 1)]
       @rows << row_sequence.split('')
       index += @width
@@ -48,10 +52,7 @@ end
 if __FILE__ == $0
   data = DATA.readline
   sif = SpaceImageFormat.new(height: 6, width: 25, sequence: data)
-  layer_with_zeros = sif.layer_with_most('0')
-  # layer_with_zeros.display
-  # print "count 1s: #{layer_with_zeros.count('1')}\n"
-  # print "count 2s: #{layer_with_zeros.count('2')}\n"
+  layer_with_zeros = sif.layer_with_least('0')
   print "\n1s times 2s: #{layer_with_zeros.count('1') * layer_with_zeros.count('2')}\n\n"
 end
 
