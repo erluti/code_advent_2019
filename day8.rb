@@ -22,6 +22,15 @@ class SpaceImageFormat
   def layer_with_least(value)
     @layers.min { |layer1, layer2| layer1.count(value) <=> layer2.count(value) }
   end
+
+  def render
+    combined_layers = @layers[0].lay_on(@layers[1])
+    index = 2
+    while index < @layers.count
+      combined_layers = combined_layers.lay_on(@layers[index])
+    end
+    combined_layers.display
+  end
 end
 
 class Layer
@@ -43,9 +52,18 @@ class Layer
     @counts[num_to_count] ||= @rows.sum { |row| row.count(num_to_count) }
   end
   def display
-    @rows.each do |row|
-      print "#{row}\n"
+    @rows.map(&:join).join("\n") + "\n"
+  end
+  def lay_on(layer2)
+    new_sequence = ''
+    (0..@sequence.length - 1).each do |index|
+      if @sequence[index] == '2' #transparent
+        new_sequence += layer2.sequence[index]
+      else
+        new_sequence += @sequence[index]
+      end
     end
+    Layer.new(height: @height, width: @width, sequence: new_sequence)
   end
 end
 

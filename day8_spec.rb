@@ -55,4 +55,28 @@ describe SpaceImageFormat do
     subject = SpaceImageFormat.new(height: 3, width: 1, sequence: '000120102111')
     expect(subject.layer_with_least('0').sequence).to eq '111'
   end
+
+  describe '#render' do
+    it 'should return a String' do
+      subject = SpaceImageFormat.new(height: 2, width: 2, sequence: '11110000')
+      expect(subject.render).to be_a String
+    end
+    it 'should display values "underneath" transparent ones' do
+      subject = SpaceImageFormat.new(height: 2, width: 2, sequence: '22221100')
+      expect(subject.render).to eq "11\n00\n"
+    end
+    it 'should not display values "underneath" opaque ones' do
+      subject = SpaceImageFormat.new(height: 2, width: 2, sequence: '00001111')
+      expect(subject.render).to eq "00\n00\n"
+    end
+  end
+end
+
+describe Layer do
+  describe '#display' do
+    it 'should be a string with linebreaks' do
+      subject = Layer.new(height: 2, width: 2, sequence: '0112')
+      expect(subject.display).to eq "01\n12\n"
+    end
+  end
 end
