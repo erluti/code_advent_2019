@@ -10,7 +10,7 @@ class ProgramSeries
   def run
     previous_output = 0
     @sequence.each do |input|
-      program = IntcodeProgram.new(@program, input: [input, previous_output])
+      program = IntcodeProgram.new(@program, input: IntcodeIO.new([input, previous_output]))
       program.run
       previous_output = program.output.first
     end
