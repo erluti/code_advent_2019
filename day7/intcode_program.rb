@@ -1,14 +1,17 @@
+require './intcode_io.rb'
 require 'byebug'
 
 class IntcodeProgram
   attr_reader :intcode
-  attr_reader :output
   attr_reader :diagnostic_success
 
-  def initialize(intcode, input:nil)
+  def initialize(intcode, input:nil, output: IntcodeIO.new)
     @intcode = intcode.split(',').map(&:to_i) # AKA memory
-    @input = input
-    @output = []
+    @input, @output = input, output
+  end
+
+  def output
+    @output.values
   end
 
   def run
@@ -70,7 +73,7 @@ class IntcodeProgram
   end
 
   def read_input
-    @input.shift
+    @input.read
   end
 
   def operation(opcode)
@@ -119,7 +122,7 @@ class IntcodeProgram
   end
 
   def output_value(value)
-    @output << value
+    @output.write(value)
   end
 
   def prime_data(position:, value:)
