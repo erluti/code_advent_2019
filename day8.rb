@@ -26,7 +26,7 @@ class SpaceImageFormat
   def render
     combined_layers = @layers[0].lay_on(@layers[1])
     index = 2
-    while index < @layers.count
+    (2..@layers.count - 1).each do |index|
       combined_layers = combined_layers.lay_on(@layers[index])
     end
     combined_layers.display
