@@ -72,6 +72,10 @@ if __FILE__ == $0
   sif = SpaceImageFormat.new(height: 6, width: 25, sequence: data)
   layer_with_zeros = sif.layer_with_least('0')
   print "\n1s times 2s: #{layer_with_zeros.count('1') * layer_with_zeros.count('2')}\n\n"
+
+  print "------------------------------------\n"
+  print sif.render.gsub('1', '█').gsub('0', ' ')
+  print "------------------------------------\n"
 end
 
 __END__
