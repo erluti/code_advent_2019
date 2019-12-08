@@ -69,6 +69,10 @@ describe SpaceImageFormat do
       subject = SpaceImageFormat.new(height: 2, width: 2, sequence: '00001111')
       expect(subject.render).to eq "00\n00\n"
     end
+    describe 'part 2 example' do
+      subject = SpaceImageFormat.new(height: 2, width: 2, sequence: '0222112222120000')
+      expect(subject.render).to eq "01\n10\n"
+    end
   end
 end
 
