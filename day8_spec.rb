@@ -33,3 +33,14 @@ describe 'part 1 sample sequence' do
     end
   end
 end
+
+describe SpaceImageFormat do
+  it 'should be able to find a layer with the most zeros for height 1' do
+    subject = SpaceImageFormat.new(height: 1, width: 2, sequence: '0012010211')
+    expect(subject.layer_with_most('0').sequence).to eq '00'
+  end
+  it 'should be able to find a layer with the most zeros for width 1' do
+    subject = SpaceImageFormat.new(height: 3, width: 1, sequence: '000120102011')
+    expect(subject.layer_with_most('0').sequence).to eq '000'
+  end
+end
