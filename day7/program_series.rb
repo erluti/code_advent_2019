@@ -15,4 +15,28 @@ class ProgramSeries
     end
     previous_output
   end
+
+  def self.find_max_series(program)
+    possible_inputs = [1,2,3,4,0]
+    max_output = 0
+    best_input = []
+
+    possible_inputs.each do |first_input|
+      (possible_inputs - [first_input]).each do |second_input|
+        (possible_inputs - [first_input, second_input]).each do |third_input|
+          (possible_inputs - [first_input, second_input, third_input]).each do |fourth_input|
+            fifth_input = (possible_inputs - [first_input, second_input, third_input, fourth_input]).first
+            inputs = [first_input, second_input, third_input, fourth_input, fifth_input]
+            result = ProgramSeries.new(program, inputs).run
+            if result > max_output
+              max_output = result
+              best_input = inputs
+            end
+          end
+        end
+      end
+    end
+    best_input
+  end
+
 end
