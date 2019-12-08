@@ -1,11 +1,42 @@
 require 'byebug'
 
 class SpaceImageFormat
+  attr_reader :layers
+  def initialize(height:, width:, sequence:)
+    @sequence = sequence
+    @height, @width = height, width
+    @layers = []
+    chunk_size = @height * @width
+    index = 0
+    while index < @sequence.length - 1
+      layer_sequence = sequence[index..(index + chunk_size - 1)]
+      @layers << Layer.new(height: @height, width: @width, sequence: layer_sequence)
+      index += chunk_size
+    end
+  end
 
+  def layer_with_most(value)
+    @layers.max { |layer| layer.count(value) }
+  end
 end
 
 class Layer
+  attr_reader :rows, :sequence
+  def initialize(height:, width:, sequence:)
+    @sequence = sequence
+    @height, @width = height, width
+    @rows = []
 
+    index = 0
+    while index < @sequence.length - 1
+      row_sequence = sequence[index..(index + @width - 1)]
+      @rows << row_sequence.split('')
+      index += @width
+    end
+  end
+  def count(num_to_count)
+    @rows.sum { |row| row.count(num_to_count) }
+  end
 end
 
 if __FILE__ == $0

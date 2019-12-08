@@ -13,7 +13,7 @@ describe 'part 1 sample sequence' do
       expect(subject.layers.count).to eq 2
     end
     it 'can fidn the layer with the most 0s' do
-      expect(subject.layer_with_most(0).sequence).to eq '789012'
+      expect(subject.layer_with_most('0').sequence).to eq '789012'
     end
   end
   describe Layer do
