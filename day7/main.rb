@@ -1,5 +1,7 @@
 require './program_series.rb'
 
+# for part 2, IntcodeProgram needs to be blocking and wait for input until it halts.  Series will need to be threaded, i think
+
 amplifier_program = DATA.readline
 best_series_program = ProgramSeries.find_max_series(amplifier_program)
 print "\nBest Series: #{best_series_program.run}\n\n"
