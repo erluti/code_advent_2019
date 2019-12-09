@@ -60,6 +60,7 @@ class ProgramSeries
             program_series = ProgramSeries.new(program, inputs)
             result = program_series.run(feedback_loop)
             if result > max_output
+              # p "New best program sequence: #{program_series.sequence}"
               max_output = result
               best_program = program_series
             end
