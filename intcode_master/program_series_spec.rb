@@ -1,4 +1,4 @@
-require './program_series.rb'
+require_relative 'program_series.rb'
 require 'rspec'
 
 # RSpec.configure do |c|

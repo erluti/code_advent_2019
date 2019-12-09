@@ -1,4 +1,4 @@
-require './intcode_program.rb'
+require_relative 'intcode_program.rb'
 require 'rspec'
 
 # RSpec.configure do |c|
