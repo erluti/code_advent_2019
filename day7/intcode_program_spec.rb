@@ -6,6 +6,26 @@ require 'rspec'
 # end
 
 describe IntcodeProgram do
+  describe '#read_input' do
+    it 'raises error' do
+      input = IntcodeIO.new
+      subject = IntcodeProgram.new('99', input: input, sleep_max: 1)
+      expect { subject.read_input }.to raise_error("I don't think a value is coming!")
+    end
+    it 'can handle a delay in input' do
+      input = IntcodeIO.new
+      subject = IntcodeProgram.new('99', input: input, sleep_max: 1)
+      t = Thread.new do
+        x = subject.read_input
+        subject.output_value(x)
+      end
+      input_value = '123'
+      input.write(input_value)
+      t.join
+      expect(subject.output).to eq [input_value]
+    end
+  end
+
   context 'day7 updates' do
     it 'can read two inputs' do
       program = '3,5,3,6,1101,0,0,7,99'

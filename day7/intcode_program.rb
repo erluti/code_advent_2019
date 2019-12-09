@@ -5,7 +5,8 @@ class IntcodeProgram
   attr_reader :intcode
   attr_reader :diagnostic_success
 
-  def initialize(intcode, input:nil, output: IntcodeIO.new)
+  def initialize(intcode, input:nil, output: IntcodeIO.new, sleep_max: 10)
+    @sleep_max = sleep_max.freeze
     @intcode = intcode.split(',').map(&:to_i) # AKA memory
     @input, @output = input, output
   end
@@ -73,7 +74,17 @@ class IntcodeProgram
   end
 
   def read_input
-    @input.read
+    input_value = @input.read
+    if input_value.nil?
+      sleep_count = 0
+      while input_value.nil?
+        raise "I don't think a value is coming!" if sleep_count >= @sleep_max
+        sleep 1
+        input_value = @input.read
+        sleep_count += 1
+      end
+    end
+    input_value
   end
 
   def operation(opcode)
