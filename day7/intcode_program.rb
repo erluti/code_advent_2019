@@ -69,7 +69,6 @@ class IntcodeProgram
       position = jump_location || (position + instruction_length)
       opcode = @intcode[position]
     end
-    # REVIEW do I need to test for diagnostic success?
     @intcode.join(',')
   end
 

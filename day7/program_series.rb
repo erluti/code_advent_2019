@@ -19,9 +19,9 @@ class ProgramSeries
     end
     last_program =
       if feedback_loop
-        IntcodeProgram.new(@program, input: next_input)
-      else
         IntcodeProgram.new(@program, input: next_input, output: initial_input)
+      else
+        IntcodeProgram.new(@program, input: next_input)
       end
     programs << last_program
 
