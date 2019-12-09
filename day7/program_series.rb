@@ -7,15 +7,34 @@ class ProgramSeries
     @program = program
   end
 
-  def run
-    previous_output = 0
-    @sequence.each do |input|
-      program = IntcodeProgram.new(@program, input: IntcodeIO.new([input, previous_output]))
-      program.run
-      previous_output = program.output.first
+  def run(initial_input = 0)
+    sequence = @sequence.dup
+    input = IntcodeIO.new([sequence.shift, initial_input])
+    next_input = IntcodeIO.new([sequence.shift])
+    programs = [IntcodeProgram.new(@program, output: next_input, input: input)]
+    sequence.each do |phase_setting|
+      input = next_input
+      next_input = IntcodeIO.new([phase_setting])
+      programs << IntcodeProgram.new(@program, output: next_input, input: input)
     end
-    previous_output
+    last_program = IntcodeProgram.new(@program, input: next_input)
+    programs << last_program
+
+    programs.collect do |program|
+      Thread.new { program.run }
+    end.map(&:join)
+    last_program.output.first
   end
+
+  # def run
+  #   previous_output = 0
+  #   @sequence.each do |input|
+  #     program = IntcodeProgram.new(@program, input: IntcodeIO.new([input, previous_output]))
+  #     program.run
+  #     previous_output = program.output.first
+  #   end
+  #   previous_output
+  # end
 
   def self.find_max_series(program)
     possible_inputs = [1,2,3,4,0]
