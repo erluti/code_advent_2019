@@ -7,17 +7,22 @@ class ProgramSeries
     @program = program
   end
 
-  def run(initial_input = 0)
+  def run(feedback_loop = false)
     sequence = @sequence.dup
-    input = IntcodeIO.new([sequence.shift, initial_input])
+    initial_input = IntcodeIO.new([sequence.shift, 0])
     next_input = IntcodeIO.new([sequence.shift])
-    programs = [IntcodeProgram.new(@program, output: next_input, input: input)]
+    programs = [IntcodeProgram.new(@program, output: next_input, input: initial_input)]
     sequence.each do |phase_setting|
       input = next_input
       next_input = IntcodeIO.new([phase_setting])
       programs << IntcodeProgram.new(@program, output: next_input, input: input)
     end
-    last_program = IntcodeProgram.new(@program, input: next_input)
+    last_program =
+      if feedback_loop
+        IntcodeProgram.new(@program, input: next_input)
+      else
+        IntcodeProgram.new(@program, input: next_input, output: initial_input)
+      end
     programs << last_program
 
     programs.collect do |program|
@@ -36,8 +41,13 @@ class ProgramSeries
   #   previous_output
   # end
 
-  def self.find_max_series(program)
-    possible_inputs = [1,2,3,4,0]
+  def self.find_max_series(program, feedback_loop: false)
+    possible_inputs =
+      if feedback_loop
+        [9,8,7,6,5]
+      else
+        [1,2,3,4,0]
+      end
     max_output = 0
     best_program = nil
 
@@ -48,7 +58,7 @@ class ProgramSeries
             fifth_input = (possible_inputs - [first_input, second_input, third_input, fourth_input]).first
             inputs = [first_input, second_input, third_input, fourth_input, fifth_input]
             program_series = ProgramSeries.new(program, inputs)
-            result = program_series.run
+            result = program_series.run(feedback_loop)
             if result > max_output
               max_output = result
               best_program = program_series
