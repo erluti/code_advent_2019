@@ -1,10 +1,12 @@
+require 'concurrent'
+
 class IntcodeIO
   def initialize(values = [])
-    @values = values
+    @values = Concurrent::Array.new(values)
   end
 
   def values
-    @values.dup
+    Array.new(@values) # read-only version of values
   end
 
   def read
