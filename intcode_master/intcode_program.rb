@@ -1,4 +1,4 @@
-require './intcode_io.rb'
+require_relative 'intcode_io.rb'
 require 'byebug'
 
 class IntcodeProgram
