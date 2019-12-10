@@ -9,6 +9,7 @@ class IntcodeProgram
     @sleep_max = sleep_max.freeze
     @intcode = intcode.split(',').map(&:to_i) # AKA memory
     @input, @output = input, output
+    @relative_base = 0
   end
 
   def output
@@ -63,6 +64,10 @@ class IntcodeProgram
         result = (v1 == v2 ? 1 : 0)
         put_result(result, position, opcode, 2)
         instruction_length = 4
+      when 9 #adjust relative base
+        base_adjustment = get_argument(position, opcode, 0)
+        @relative_base += base_adjustment
+        instruction_length = 2
       else
         raise "#{opcode} not an opcode!"
       end
@@ -99,24 +104,37 @@ class IntcodeProgram
     (1..argument_index).each do
       arg_modifiers /= 10
     end
-    arg_modifiers % 10 == 1 ? :immediate : :position
+    case arg_modifiers % 10
+    when 0
+      :position
+    when 1
+      :immediate
+    when 2
+      :relative
+    else
+      raise "Parameter mode not found! opcode: #{opcode} argument_index: #{argument_index}"
+    end
   end
 
   def value_at(position, mode)
-    if mode == :position
+    case mode
+    when :position
       value_by_pointer(position)
-    else
+    when :relative
+      value(value(position) + @relative_base)
+    when :immediate
       value(position)
     end
   end
 
   def value(position)
+    right_size_array(position)
     @intcode[position]
   end
 
   def value_by_pointer(position)
     p = @intcode[position]
-    @intcode[p]
+    value(p)
   end
 
   def put_result(result, position, opcode, argument_index)
@@ -124,17 +142,30 @@ class IntcodeProgram
   end
 
   def write_at(value, position, mode)
-    location = position
-    if mode == :position
-      location = @intcode[position]
-    end
+    location =
+      case mode
+      when :position
+        @intcode[position]
+      when :relative
+        @intcode[position + @relative_base]
+      when :immediate
+        position
+      end
+    right_size_array(location)
     @intcode[location] = value
+  end
+
+  def right_size_array(index)
+    if index > @intcode.length
+      @intcode += Array.new(index - @intcode.length + 1, 0)
+    end
   end
 
   def output_value(value)
     @output.write(value)
   end
 
+  # inserts values into a loaded program (before a run)
   def prime_data(position:, value:)
     @intcode[position] = value
   end
