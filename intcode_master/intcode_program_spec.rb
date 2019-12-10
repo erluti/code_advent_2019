@@ -19,7 +19,7 @@ describe IntcodeProgram do
       subject = IntcodeProgram.new(intcode)
       subject.run
       sixteen_digit_number = subject.output.first
-      expect(sixteen_digit_number / 1000000000000000).to be > 1 #has a 16th digit
+      expect(sixteen_digit_number / 1_000_000_000_000_000).to be > 0 #has a 16th digit
       expect(sixteen_digit_number).to be < 10000000000000000 #doesn't have 17 digits
     end
     it 'should have 104,1125899906842624,99 output the large number in the middle' do
