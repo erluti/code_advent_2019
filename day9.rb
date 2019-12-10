@@ -1,4 +1,4 @@
-require './intcode_master/program_series.rb'
+require './intcode/program_series.rb'
 
 BOOST_program = DATA.readline
 input = IntcodeIO.new([1])

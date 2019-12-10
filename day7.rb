@@ -1,4 +1,4 @@
-require './intcode_master/program_series.rb'
+require './intcode/program_series.rb'
 
 amplifier_program = DATA.readline
 # best_series_program = ProgramSeries.find_max_series(amplifier_program)
