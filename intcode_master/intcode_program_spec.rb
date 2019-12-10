@@ -29,6 +29,10 @@ describe IntcodeProgram do
       middle_number = intcode.split(',')[1].to_i
       expect(subject.output.first).to eq middle_number
     end
+    it 'can add with a relative param' do
+      intcode = '109,2,02201,1,2,2,99'
+      expect(IntcodeProgram.new(intcode).run).to eq '109,2,3,1,2,2,99'
+    end
   end
 
   describe '#read_input' do

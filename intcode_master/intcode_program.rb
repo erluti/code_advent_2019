@@ -147,7 +147,7 @@ class IntcodeProgram
       when :position
         @intcode[position]
       when :relative
-        @intcode[position + @relative_base]
+        @intcode[position] + @relative_base
       when :immediate
         position
       end
