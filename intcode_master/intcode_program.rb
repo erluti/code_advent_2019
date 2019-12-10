@@ -99,6 +99,10 @@ class IntcodeProgram
     value_at(position + 1 + argument_index, parameter_mode(opcode, argument_index))
   end
 
+  def put_result(result, position, opcode, argument_index)
+    write_at(result, position + 1 + argument_index, parameter_mode(opcode, argument_index))
+  end
+
   def parameter_mode(opcode, argument_index)
     arg_modifiers = opcode/100
     (1..argument_index).each do
@@ -117,42 +121,27 @@ class IntcodeProgram
   end
 
   def value_at(position, mode)
-    case mode
-    when :position
-      value_by_pointer(position)
-    when :relative
-      value(value(position) + @relative_base)
-    when :immediate
-      value(position)
-    end
+    location = location(position, mode)
+    right_size_array(location)
+    @intcode[location]
   end
 
-  def value(position)
-    right_size_array(position)
-    @intcode[position]
-  end
-
-  def value_by_pointer(position)
-    p = @intcode[position]
-    value(p)
-  end
-
-  def put_result(result, position, opcode, argument_index)
-    write_at(result, position + 1 + argument_index, parameter_mode(opcode, argument_index))
-  end
 
   def write_at(value, position, mode)
-    location =
-      case mode
-      when :position
-        @intcode[position]
-      when :relative
-        @intcode[position] + @relative_base
-      when :immediate
-        position
-      end
+    location = location(position, mode)
     right_size_array(location)
     @intcode[location] = value
+  end
+
+  def location(position, mode)
+    case mode
+    when :position
+      @intcode[position]
+    when :relative
+      @intcode[position] + @relative_base
+    when :immediate
+      position
+    end
   end
 
   def right_size_array(index)
