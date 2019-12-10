@@ -1,4 +1,4 @@
-require './intcode_program.rb'
+require_relative 'intcode_program.rb'
 
 class ProgramSeries
   attr_reader :sequence, :program

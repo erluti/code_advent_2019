@@ -1,4 +1,4 @@
-require './intcode_program.rb'
+require_relative 'intcode_program.rb'
 require 'rspec'
 
 # RSpec.configure do |c|
@@ -6,6 +6,35 @@ require 'rspec'
 # end
 
 describe IntcodeProgram do
+  describe 'support for relative params and opcode 9' do
+    # this is for day9
+    it 'should copy this program into output: 109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99' do
+      intcode = '109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99'
+      subject = IntcodeProgram.new(intcode)
+      subject.run
+      expect(subject.output.join(',')).to eq intcode
+    end
+    it 'should have 1102,34915192,34915192,7,4,7,99,0 output a 16-digit number' do
+      intcode = '1102,34915192,34915192,7,4,7,99,0'
+      subject = IntcodeProgram.new(intcode)
+      subject.run
+      sixteen_digit_number = subject.output.first
+      expect(sixteen_digit_number / 1_000_000_000_000_000).to be > 0 #has a 16th digit
+      expect(sixteen_digit_number).to be < 10000000000000000 #doesn't have 17 digits
+    end
+    it 'should have 104,1125899906842624,99 output the large number in the middle' do
+      intcode = '104,1125899906842624,99'
+      subject = IntcodeProgram.new(intcode)
+      subject.run
+      middle_number = intcode.split(',')[1].to_i
+      expect(subject.output.first).to eq middle_number
+    end
+    it 'can add with a relative param' do
+      intcode = '109,2,02201,1,2,2,99'
+      expect(IntcodeProgram.new(intcode).run).to eq '109,2,3,1,2,2,99'
+    end
+  end
+
   describe '#read_input' do
     it 'raises error' do
       input = IntcodeIO.new
