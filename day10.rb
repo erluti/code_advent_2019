@@ -11,6 +11,8 @@ class AsteroidMap
 end
 
 if __FILE__ == $0
+  map = AsteroidMap.new(DATA.read)
+  print "\nNumber of asteroids detected from best location: #{map.max_visibility_count}\n\n"
 end
 
 __END__
