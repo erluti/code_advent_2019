@@ -18,11 +18,23 @@ class PaintingRobot
   def paint
     controller_thread = Thread.new { @controller.run }
 
-    paint_color = read_action # first output is color
-    current_panel.paint(paint_color)
-    turn_direction = read_action # second output is turn direction
-    @direction += turn_direction == 0 ? -90 : 90
-
+    while controller_thread.alive?
+      paint_color = read_action # first output is color
+      current_panel.paint(paint_color)
+      turn_direction = read_action # second output is turn direction
+      @direction += turn_direction == 0 ? -90 : 90
+      case @direction % 360
+      when 0 # up
+        @position_y += 1
+      when 90 # right
+        @position_x += 1
+      when 180 # down
+        @position_y -= 1
+      when 270
+        @position_x -= 1
+      end
+      @panel_reader.write(current_panel.color)
+    end
 
     controller_thread.join
   end
@@ -57,7 +69,7 @@ class HullMap
 end
 
 class Panel
-  @attr_read :color
+  attr_reader :color
   def initialize
     @color = 0
     @painted = false
