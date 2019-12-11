@@ -3,7 +3,7 @@ require 'rspec'
 
 describe AsteroidMap do
   describe 'example 1' do
-    let(example_input) do
+    let(:example_input) do
       <<~MAP
         .#..#
         .....
@@ -21,7 +21,7 @@ describe AsteroidMap do
     end
   end
   describe 'example 2' do
-    let(example_input) do
+    let(:example_input) do
       <<~MAP
         ......#.#.
         #..#.#....
@@ -44,7 +44,7 @@ describe AsteroidMap do
     end
   end
   describe 'example 3' do
-    let(example_input) do
+    let(:example_input) do
       <<~MAP
         #.#...#.#.
         .###....#.
@@ -67,7 +67,7 @@ describe AsteroidMap do
     end
   end
   describe 'example 4' do
-    let(example_input) do
+    let(:example_input) do
       <<~MAP
         .#..#..###
         ####.###.#
@@ -90,7 +90,7 @@ describe AsteroidMap do
     end
   end
   describe 'example 5' do
-    let(example_input) do
+    let(:example_input) do
       <<~MAP
         .#..##.###...#######
         ##.############..##.
