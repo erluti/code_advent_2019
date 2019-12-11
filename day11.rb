@@ -11,6 +11,10 @@ class PaintingRobot
     @controller = IntcodeProgram.new(intcode, input:@panel_reader, output: @actions)
   end
 
+  def position
+    [@position_x, @position_y]
+  end
+
   def current_panel
     @hullmap.panel(@position_x, @position_y)
   end
@@ -55,8 +59,9 @@ class PaintingRobot
 end
 
 class HullMap
-  def initialize
+  def initialize(initial_panel=nil)
     @map = Hash.new {|hash, key| hash[key] = Panel.new }
+    @map[[0,0]] = initial_panel if initial_panel
   end
 
   def panel(x,y)
@@ -66,12 +71,24 @@ class HullMap
   def count_painted
     @map.values.count { |panel| panel.painted? }
   end
+
+  def display
+    xs = @map.keys.collect { |x, _| x }
+    ys = @map.keys.collect { |_, y| y }
+
+    (ys.min .. ys.max).collect do |y|
+      string = (xs.min .. xs.max).collect do |x|
+        panel(x,y).display
+      end.join
+      "#{string}\n"
+    end.reverse # reverse because min y should be bottom
+  end
 end
 
 class Panel
   attr_reader :color
-  def initialize
-    @color = 0
+  def initialize(color = 0)
+    @color = color
     @painted = false
   end
 
@@ -83,15 +100,26 @@ class Panel
   def painted?
     @painted
   end
+
+  def display
+    case @color
+    when 0
+      ' '
+    when 1
+      '█'
+    end
+  end
 end
 
 if __FILE__ == $0
   intcode = DATA.readline
-  map = HullMap.new
+  map = HullMap.new(Panel.new(1))
   robot = PaintingRobot.new(intcode: intcode, hullmap: map)
   robot.paint
 
   print "\nPainted #{map.count_painted} Panels\n\n"
+  x = map.display
+  x.map { |string| print string }
 end
 
 __END__
