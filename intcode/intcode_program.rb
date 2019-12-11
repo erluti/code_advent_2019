@@ -3,7 +3,6 @@ require 'byebug'
 
 class IntcodeProgram
   attr_reader :intcode
-  attr_reader :diagnostic_success
 
   def initialize(intcode, input:nil, output: IntcodeIO.new, sleep_max: 10)
     @sleep_max = sleep_max.freeze
