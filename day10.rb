@@ -15,15 +15,39 @@ class AsteroidMap
     while base = asteroids.shift
       asteroids.each do |asteroid|
         m = slope(base, asteroid)
-        b = base.last - (m * base.first) unless m == Float::INFINITY
+        if m == Float::INFINITY
+          b = asteroid.first # set b to the x value because this line is vertical (this is admitedly hackish, but I blame infinity)
+        else
+          b = base.last - (m * base.first) # b is the y-intercept of a line
+        end
         @asteroids_in_line[[m,b]] = @asteroids_in_line[[m,b]] | [base, asteroid]
       end
     end
 
-    @memoized_asteroid_los_counts = Hash.new do |h,k|
-      h[k] = @asteroids_in_line.count do |_, asteroids|
-        asteroids.include?(k)
+    @asteroids_in_line.each do |line_params, asteroids|
+      if line_params.first == 0 #horizontal line
+        asteroids.sort! { |a,b| a.first <=> b.first } #sort by x coordinate
+      else
+        asteroids.sort! { |a,b| a.last <=> b.last } #sort by y coordinates
       end
+    end
+
+    # byebug
+    # lines = @asteroids_in_line.select {|line, points| points.include?([11,13])}
+    # lines.select {|line, points| points.first != [11,13] && points.last != [11,13]}.values.map(&:count)
+
+    @memoized_asteroid_los_counts = Hash.new do |h,k|
+      h[k] = @asteroids_in_line.collect do |_, asteroids|
+        if asteroids.include?(k)
+          if asteroids.first == k || asteroids.last == k
+            1 # if it's first or last in the list of asteroids, count once
+          else
+            2 # if it's in the middle it can see an asteroid on either side
+          end
+        else
+          0
+        end
+      end.sum
     end
   end
 
