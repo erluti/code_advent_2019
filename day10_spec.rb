@@ -1,6 +1,10 @@
 require './day10.rb'
 require 'rspec'
 
+# RSpec.configure do |c|
+#   c.filter_run_including :focus => true
+# end
+
 describe AsteroidMap do
   describe 'example 1' do
     let(:example_input) do
