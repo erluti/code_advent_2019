@@ -1,9 +1,9 @@
 require './day10.rb'
 require 'rspec'
 
-# RSpec.configure do |c|
-#   c.filter_run_including :focus => true
-# end
+RSpec.configure do |c|
+  c.filter_run_including :focus => true
+end
 
 describe AsteroidMap do
   describe 'example 1' do
@@ -23,6 +23,16 @@ describe AsteroidMap do
     it 'should find 3,4 as the highest visibility location' do
       expect(subject.max_visibility_location).to eq [3,4]
     end
+    fit 'can display 3,4' do
+      result = <<~MAP
+        .. AA .. .. ab
+        .. .. .. .. ..
+        ac ad aa ae af
+        .. .. .. .. ag
+        .. .. .. ** ah
+      MAP
+      expect(subject.display([3,4])).to eq result
+    end
   end
   describe 'example 2' do
     let(:example_input) do
@@ -41,6 +51,7 @@ describe AsteroidMap do
     end
     subject { AsteroidMap.new(example_input) }
     it 'should find 33 as the highest visibility count' do
+      byebug
       expect(subject.max_visibility_count).to eq 33
     end
     it 'should find 5,8 as the highest visibility location' do

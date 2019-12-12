@@ -1,9 +1,15 @@
 require 'byebug'
 
+# TODO the next step in debugging would be to display the map show the maxsteroid and marking each other asteroid as visible or blocked (use a letter, caps for vizible, lower for blocked like example)
+
 class AsteroidMap
   def initialize(map_text)
+    map_lines = map_text.split("\n")
+    @width = map_lines.first.length
+    @height = map_lines.count
+
     asteroids = []
-    map_text.split("\n").each_with_index do |line, y|
+    map_lines.each_with_index do |line, y|
       line.split('').each_with_index do |location, x|
         asteroids << [x, y] if location == "#"
       end
@@ -48,6 +54,40 @@ class AsteroidMap
           0
         end
       end.sum
+    end
+
+    def display(asteroid_base)
+      letters = ('AA'..'ZZ').to_a
+      display_values = {}
+      lines_of_sight = @asteroids_in_line.select { |line, points| points.include?(asteroid_base) }
+      lines_of_sight.keys.each do |line_params|
+        display_values[line_params] = letters.shift
+      end
+      string = ''
+      (0..@height - 1).each do |y|
+        (0..@width - 1).each do |x|
+          string <<
+            if asteroid_base == [x,y]
+              '**'
+            elsif @all_asteroids.include?([x,y])
+              los = lines_of_sight.find {|line_params, aligned_asteroids| aligned_asteroids.include?([x,y])}
+              if los
+                show = display_values[los.first]
+                base_index = los.last.index(asteroid_base)
+                this_index = los.last.index([x,y])
+                show.downcase! if (this_index - base_index).abs == 1
+                show
+              else
+                '##'
+              end
+            else
+              '..'
+            end
+          string << ' ' if x + 1 < @width
+        end
+        string << "\n"
+      end
+      string
     end
   end
 
