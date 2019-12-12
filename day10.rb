@@ -38,6 +38,13 @@ class AsteroidMap
 private
   def slope(asteroid1, asteroid2)
     return Float::INFINITY if asteroid2.first - asteroid1.first == 0
+
+    # as Rational numbers instead of rounded floats, but doesn't change result of specs
+    # y_diff = asteroid2.last - asteroid1.last
+    # x_diff = asteroid2.first - asteroid1.first
+    # sign = (y_diff <=> 0) * (x_diff <=> 0)
+    # Rational("#{sign * y_diff.abs}/#{x_diff.abs}")
+
     (asteroid2.last - asteroid1.last)/(asteroid2.first - asteroid1.first).to_f
   end
 
