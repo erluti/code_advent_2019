@@ -9,69 +9,74 @@ class IntcodeProgram
     @intcode = intcode.split(',').map(&:to_i) # AKA memory
     @input, @output = input, output
     @relative_base = 0
+
+    @instruction_pointer = 0
   end
 
   def output
     @output.values
   end
 
-  def run
-    position = 0 # aka instruction pointer
+  def run_next_instruction
+    position = @instruction_pointer
     opcode = @intcode[position]
-    while operation(opcode) != 99
-      instruction_length = 0
-      jump_location = nil
-      case operation(opcode)
-      when 1 # add
-        v1 = get_argument(position, opcode, 0)
-        v2 = get_argument(position, opcode, 1)
-        put_result(v1 + v2, position, opcode, 2)
-        instruction_length = 4
-      when 2 # multiply
-        v1 = get_argument(position, opcode, 0)
-        v2 = get_argument(position, opcode, 1)
-        put_result(v1 * v2, position, opcode, 2)
-        instruction_length = 4
-      when 3 # input
-        put_result(read_input, position, opcode, 0)
-        instruction_length = 2
-      when 4 # output
-        value = get_argument(position, opcode, 0)
-        output_value(value)
-        instruction_length = 2
-      when 5 # jump-if-true
-        value = get_argument(position, opcode, 0)
-        if value != 0
-          jump_location = get_argument(position, opcode, 1)
-        end
-        instruction_length = 3
-      when 6 # jump-if-false
-        value = get_argument(position, opcode, 0)
-        if value == 0
-          jump_location = get_argument(position, opcode, 1)
-        end
-        instruction_length = 3
-      when 7 # less than
-        v1 = get_argument(position, opcode, 0)
-        v2 = get_argument(position, opcode, 1)
-        result = (v1 < v2 ? 1 : 0)
-        put_result(result, position, opcode, 2)
-        instruction_length = 4
-      when 8 # equals
-        v1 = get_argument(position, opcode, 0)
-        v2 = get_argument(position, opcode, 1)
-        result = (v1 == v2 ? 1 : 0)
-        put_result(result, position, opcode, 2)
-        instruction_length = 4
-      when 9 #adjust relative base
-        base_adjustment = get_argument(position, opcode, 0)
-        @relative_base += base_adjustment
-        instruction_length = 2
-      else
-        raise "#{opcode} not an opcode!"
+    instruction_length = 0
+    jump_location = nil
+    case operation(opcode)
+    when 1 # add
+      v1 = get_argument(position, opcode, 0)
+      v2 = get_argument(position, opcode, 1)
+      put_result(v1 + v2, position, opcode, 2)
+      instruction_length = 4
+    when 2 # multiply
+      v1 = get_argument(position, opcode, 0)
+      v2 = get_argument(position, opcode, 1)
+      put_result(v1 * v2, position, opcode, 2)
+      instruction_length = 4
+    when 3 # input
+      put_result(read_input, position, opcode, 0)
+      instruction_length = 2
+    when 4 # output
+      value = get_argument(position, opcode, 0)
+      output_value(value)
+      instruction_length = 2
+    when 5 # jump-if-true
+      value = get_argument(position, opcode, 0)
+      if value != 0
+        jump_location = get_argument(position, opcode, 1)
       end
-      position = jump_location || (position + instruction_length)
-      opcode = @intcode[position]
+      instruction_length = 3
+    when 6 # jump-if-false
+      value = get_argument(position, opcode, 0)
+      if value == 0
+        jump_location = get_argument(position, opcode, 1)
+      end
+      instruction_length = 3
+    when 7 # less than
+      v1 = get_argument(position, opcode, 0)
+      v2 = get_argument(position, opcode, 1)
+      result = (v1 < v2 ? 1 : 0)
+      put_result(result, position, opcode, 2)
+      instruction_length = 4
+    when 8 # equals
+      v1 = get_argument(position, opcode, 0)
+      v2 = get_argument(position, opcode, 1)
+      result = (v1 == v2 ? 1 : 0)
+      put_result(result, position, opcode, 2)
+      instruction_length = 4
+    when 9 #adjust relative base
+      base_adjustment = get_argument(position, opcode, 0)
+      @relative_base += base_adjustment
+      instruction_length = 2
+    else
+      raise "#{opcode} not an opcode!"
+    end
+    @instruction_pointer = jump_location || (position + instruction_length)
+  end
+
+  def run
+    while operation(@intcode[@instruction_pointer]) != 99
+      run_next_instruction
     end
     @intcode.join(',')
   end
