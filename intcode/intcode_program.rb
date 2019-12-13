@@ -11,6 +11,7 @@ class IntcodeProgram
     @relative_base = 0
 
     @instruction_pointer = 0
+    @halted = false
   end
 
   def output
@@ -68,6 +69,8 @@ class IntcodeProgram
       base_adjustment = get_argument(position, opcode, 0)
       @relative_base += base_adjustment
       instruction_length = 2
+    when 99
+      @halted = true
     else
       raise "#{opcode} not an opcode!"
     end
@@ -75,10 +78,15 @@ class IntcodeProgram
   end
 
   def run
-    while operation(@intcode[@instruction_pointer]) != 99
+    run_next_instruction unless @halted
+    while running
       run_next_instruction
     end
     @intcode.join(',')
+  end
+
+  def running
+    !@halted
   end
 
   def read_input
