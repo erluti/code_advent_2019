@@ -113,24 +113,9 @@ private
   end
 end
 
-# class Asteroid
-#   attr_reader :x, :y
-#   def initialize(x,y)
-#     @x, @y = x, y
-#   end
-
-#   def point
-#     [@x, @y]
-#   end
-
-#   def slope(other)
-#     (other.y - @y)/(other.x - @x)
-#   end
-# end
-
 if __FILE__ == $0
   map = AsteroidMap.new(DATA.read)
-  print "\nNumber of asteroids detected from best location: #{map.max_visibility_count}\n\n"
+  print "\nNumber of asteroids detected from best location (#{map.max_visibility_location}): #{map.max_visibility_count}\n\n"
 end
 
 __END__
