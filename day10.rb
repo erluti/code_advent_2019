@@ -43,15 +43,12 @@ class AsteroidMap
     # lines.select {|line, points| points.first != [11,13] && points.last != [11,13]}.values.map(&:count)
 
     @memoized_asteroid_los_counts = Hash.new do |h,k|
-      h[k] = @asteroids_in_line.collect do |_, asteroids|
-        if asteroids.include?(k)
-          if asteroids.first == k || asteroids.last == k
-            1 # if it's first or last in the list of asteroids, count once
-          else
-            2 # if it's in the middle it can see an asteroid on either side
-          end
+      lines = @asteroids_in_line.select {|line, points| points.include?(k)}
+      h[k] = lines.collect do |_, asteroids|
+        if asteroids.first == k || asteroids.last == k
+          1 # if it's first or last in the list of asteroids, count once
         else
-          0
+          2 # if it's in the middle it can see an asteroid on either side
         end
       end.sum
     end
@@ -103,13 +100,10 @@ private
   def slope(asteroid1, asteroid2)
     return Float::INFINITY if asteroid2.first - asteroid1.first == 0
 
-    # as Rational numbers instead of rounded floats, but doesn't change result of specs
-    # y_diff = asteroid2.last - asteroid1.last
-    # x_diff = asteroid2.first - asteroid1.first
-    # sign = (y_diff <=> 0) * (x_diff <=> 0)
-    # Rational("#{sign * y_diff.abs}/#{x_diff.abs}")
-
-    (asteroid2.last - asteroid1.last)/(asteroid2.first - asteroid1.first).to_f
+    y_diff = asteroid2.last - asteroid1.last
+    x_diff = asteroid2.first - asteroid1.first
+    sign = (y_diff <=> 0) * (x_diff <=> 0)
+    Rational("#{sign * y_diff.abs}/#{x_diff.abs}")
   end
 
   def maxsteroid
