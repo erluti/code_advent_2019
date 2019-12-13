@@ -7,39 +7,134 @@ PADDLE = '_'
 BALL = '*'
 
 class GameDisplay < IntcodeIO
+  def initialize(*args)
+    super(args)
+    @grid = Hash.new { |h,k| h[k] = [] }
+    @score = 0
+  end
+
+  def screen_available?
+    @grid.keys.count == 23
+  end
+
   def display
-    grid = Hash.new { |h,k| h[k] = [] }
-    values.each_slice(3) do |x,y,tile_id|
-      representation =
-        case tile_id
-        when 0 # empty
-          EMPTY
-        when 1 # wall
-          WALL
-        when 2 # block
-          BLOCK
-        when 3 # paddle
-          PADDLE
-        when 4 # ball
-          BALL
-        else
-          raise "#{tile_id} is not supported tile type!"
-        end
-      grid[x][y] = representation
+    outputs = []
+    while (output = read)
+      outputs << output
     end
-    grid
+    while outputs.length % 3 != 0
+      output = read
+      if output
+        outputs << output
+      else
+        sleep 0.0001
+      end
+    end
+    if outputs.any?
+      outputs.each_slice(3) do |x,y,tile_id|
+        if x == -1 # this is a score ouput
+          @score = tile_id
+          next
+        end
+
+        representation =
+          case tile_id
+          when 0 # empty
+            EMPTY
+          when 1 # wall
+            WALL
+          when 2 # block
+            BLOCK
+          when 3 # paddle
+            PADDLE
+          when 4 # ball
+            BALL
+          else
+            raise "#{tile_id.inspect} is not supported tile type!"
+          end
+        @grid[y][x] = representation
+      end
+    end
+
+    string = "SCORE: #{@score}\n"
+    if screen_available?
+      (0..@grid.keys.max).each do |y|
+        string << "#{@grid[y].join('')}\n"
+      end
+    else
+      string << "loading...\n"
+    end
+    string
+  end
+end
+
+class GameRunner
+  def initialize(intcode,output:)
+    with_quarters = intcode.dup
+    # with_quarters[0] = '2'
+    @joystick = IntcodeIO.new
+    @screen = output
+    @game = IntcodeProgram.new(with_quarters, input: @joystick, output: output)
+  end
+
+  def run(render_delay=0.5)
+    game_thread =
+      Thread.new do
+        @game.run_next_instruction
+        while @game.running
+          @game.run_next_instruction
+          sleep 0.00001 # don't hog control
+        end # while game running
+      end # thread definiton
+
+    # joystick_thread =
+    #   Thread.new do
+    #     @joystick.write(get_input)
+    #     sleep 0.00001 # don't hog control
+    #   end
+
+    while @game.running
+      if @screen.screen_available?
+        print_screen
+      else
+        @screen.display #calculate display
+      end
+      sleep render_delay
+    end
+
+    # joystick_thread.kill
+    game_thread.join
+    print_screen
+  end
+
+  def print_screen
+    system "clear"
+    print @screen.display
+  end
+
+  def get_input
+    input = STDIN.getc.chr
+    case input
+    when 'l'
+      1
+    when 'a'
+      -1
+    else
+      0
+    end
   end
 end
 
 if __FILE__ == $0
   intcode = DATA.readline
   screen = GameDisplay.new
-  game = IntcodeProgram.new(intcode, output: screen)
+  game = GameRunner.new(intcode, output: screen)
+  # game = IntcodeProgram.new(intcode, input: IntcodeIO.new([1,1,1,1,1,1,1,1]), output: screen)
   game.run
 
-  grid = screen.display
-  blocks = grid.collect { |key, value| value.count { |tile| tile == BLOCK } }.sum
-  print "\nDisplaying #{blocks} Blocks\n\n"
+  # grid = screen.display
+  # blocks = grid.collect { |key, value| value.count { |tile| tile == BLOCK } }.sum
+  # print "\nDisplaying #{blocks} Blocks\n\n"
 end
 
 __END__
