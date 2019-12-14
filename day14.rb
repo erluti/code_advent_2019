@@ -3,24 +3,42 @@ require 'byebug'
 class NanoFactory
   def initialize(reactions_text)
     reactions = reactions_text.split("\n")
-    @component_chemicals = {}
+    @formulas = {}
     reactions.each do |reaction|
       source, result = reaction.split(" => ")
       resultant_chemical = portioned_chemical(result)
       source_chemicals = source.split(', ').collect { |s| portioned_chemical(s) }
 
-      @component_chemicals[resultant_chemical[:name]] = {result: resultant_chemical, sources: source_chemicals}
+      @formulas[resultant_chemical[:name]] = { sources: source_chemicals, produced: resultant_chemical[:amount] }
     end
   end
 
   def ore_required
-    -1
+    reduciables = [ { name: 'FUEL', amount: @formulas['FUEL'][:produced] }] # should be 1 produced
+    total_ore = 0
+    while reduciables.any?
+      reduciables = reduciables.flat_map { |component| reduce(component) }
+      total_ore += reduciables.collect { |reduciable| reduciable[:name] == 'ORE' ? reduciable[:amount] : 0 }.sum
+      reduciables.reject! { |reduciable| reduciable[:name] == 'ORE' }
+    end
+    total_ore
+  end
+
+  def reduce(chemical_to_reduce)
+    name = chemical_to_reduce[:name]
+    multiplier = round_div(chemical_to_reduce[:amount], @formulas[name][:produced])
+    @formulas[name][:sources].collect { |source| { name: source[:name], amount: source[:amount] * multiplier } }
   end
 
 private
   def portioned_chemical(string)
     amount, name = string.split(' ')
     {name: name, amount: amount.to_i}
+  end
+
+  # divides and rounds up the number, source https://stackoverflow.com/a/36917763
+  def round_div(x,y)
+    (x + y / 2) / y
   end
 end
 
