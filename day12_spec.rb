@@ -18,25 +18,25 @@ describe OrbitalSystem do
         expect(moon1.coordinates).to eq [2,-1,1]
       end
       it 'should have moon1 with velocity [3,-1,-1]' do
-        expect(moon1.coordinates).to eq [3,-1,-1]
+        expect(moon1.velocites).to eq [3,-1,-1]
       end
       it 'should have moon2 at [3,-7,-4]' do
         expect(moon2.coordinates).to eq [3,-7,-4]
       end
       it 'should have moon2 with velocity [1,3,3]' do
-        expect(moon2.coordinates).to eq [1,3,3]
+        expect(moon2.velocites).to eq [1,3,3]
       end
       it 'should have moon3 at [1,-7,5]' do
         expect(moon3.coordinates).to eq [1,-7,5]
       end
       it 'should have moon3 with velocity [-3,1,-3]' do
-        expect(moon3.coordinates).to eq [-3,1,-3]
+        expect(moon3.velocites).to eq [-3,1,-3]
       end
       it 'should have moon4 at [2,2,0]' do
         expect(moon4.coordinates).to eq [2,2,0]
       end
       it 'should have moon4 with velocity [-1,-3,1]' do
-        expect(moon4.coordinates).to eq [-1,-3,1]
+        expect(moon4.velocites).to eq [-1,-3,1]
       end
     end
     it 'should have a total energy of 179 after 10 steps' do
@@ -47,6 +47,17 @@ describe OrbitalSystem do
 end
 
 describe Moon do
+  describe '#apply_gravity' do
+    subject { Moon.new(0,0,0) }
+    context 'apply 5,5,5' do
+      let(:moon) { Moon.new(1,1,1,1) }
+      it 'after step, velocity should be 1,1,1' do
+        subject.apply_gravity(moon)
+        subject.step
+        expect(subject.velocities).to eq [1,1,1]
+      end
+    end
+  end
   describe '#total_energy' do
     subject { Moon.new(1,1,1) }
     it 'should return 0 with no velocity' do
