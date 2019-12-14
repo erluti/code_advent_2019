@@ -8,6 +8,14 @@ class Moon
 
   attr_reader :x, :y, :z
 
+  def coordinates
+    [@x, @y, @z]
+  end
+
+  def velocites
+    [@vx, @vy, @vz]
+  end
+
   def initialize(x,y,z)
     @x, @y, @z = x,y,z
     @vx, @vy, @vz = 0,0,0

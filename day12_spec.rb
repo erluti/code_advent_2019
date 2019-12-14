@@ -7,13 +7,37 @@ require 'rspec'
 
 describe OrbitalSystem do
   describe 'first example' do
-    subject do
-      moons = []
-      moons << Moon.new_from_string('<x=-1, y=0, z=2>')
-      moons << Moon.new_from_string('<x=2, y=-10, z=-7>')
-      moons << Moon.new_from_string('<x=4, y=-8, z=8>')
-      moons << Moon.new_from_string('<x=3, y=5, z=-1>')
-      OrbitalSystem.new(moons)
+    let(:moon1) { Moon.new_from_string('<x=-1, y=0, z=2>') }
+    let(:moon2) { Moon.new_from_string('<x=2, y=-10, z=-7>') }
+    let(:moon3) { Moon.new_from_string('<x=4, y=-8, z=8>') }
+    let(:moon4) { Moon.new_from_string('<x=3, y=5, z=-1>') }
+    subject { OrbitalSystem.new([moon1, moon2, moon3, moon4]) }
+    describe 'After 1 step' do
+      before { subject.step }
+      it 'should have moon1 at [2,-1,1]' do
+        expect(moon1.coordinates).to eq [2,-1,1]
+      end
+      it 'should have moon1 with velocity [3,-1,-1]' do
+        expect(moon1.coordinates).to eq [3,-1,-1]
+      end
+      it 'should have moon2 at [3,-7,-4]' do
+        expect(moon2.coordinates).to eq [3,-7,-4]
+      end
+      it 'should have moon2 with velocity [1,3,3]' do
+        expect(moon2.coordinates).to eq [1,3,3]
+      end
+      it 'should have moon3 at [1,-7,5]' do
+        expect(moon3.coordinates).to eq [1,-7,5]
+      end
+      it 'should have moon3 with velocity [-3,1,-3]' do
+        expect(moon3.coordinates).to eq [-3,1,-3]
+      end
+      it 'should have moon4 at [2,2,0]' do
+        expect(moon4.coordinates).to eq [2,2,0]
+      end
+      it 'should have moon4 with velocity [-1,-3,1]' do
+        expect(moon4.coordinates).to eq [-1,-3,1]
+      end
     end
     it 'should have a total energy of 179 after 10 steps' do
       10.times { subject.step }
