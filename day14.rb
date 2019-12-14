@@ -3,10 +3,24 @@ require 'byebug'
 class NanoFactory
   def initialize(reactions_text)
     reactions = reactions_text.split("\n")
+    @component_chemicals = {}
+    reactions.each do |reaction|
+      source, result = reaction.split(" => ")
+      resultant_chemical = portioned_chemical(result)
+      source_chemicals = source.split(', ').collect { |s| portioned_chemical(s) }
+
+      @component_chemicals[resultant_chemical[:name]] = {result: resultant_chemical, sources: source_chemicals}
+    end
   end
 
   def ore_required
     -1
+  end
+
+private
+  def portioned_chemical(string)
+    amount, name = string.split(' ')
+    {name: name, amount: amount.to_i}
   end
 end
 
