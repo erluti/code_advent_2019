@@ -18,25 +18,25 @@ describe OrbitalSystem do
         expect(moon1.coordinates).to eq [2,-1,1]
       end
       it 'should have moon1 with velocity [3,-1,-1]' do
-        expect(moon1.velocites).to eq [3,-1,-1]
+        expect(moon1.velocities).to eq [3,-1,-1]
       end
       it 'should have moon2 at [3,-7,-4]' do
         expect(moon2.coordinates).to eq [3,-7,-4]
       end
       it 'should have moon2 with velocity [1,3,3]' do
-        expect(moon2.velocites).to eq [1,3,3]
+        expect(moon2.velocities).to eq [1,3,3]
       end
       it 'should have moon3 at [1,-7,5]' do
         expect(moon3.coordinates).to eq [1,-7,5]
       end
       it 'should have moon3 with velocity [-3,1,-3]' do
-        expect(moon3.velocites).to eq [-3,1,-3]
+        expect(moon3.velocities).to eq [-3,1,-3]
       end
       it 'should have moon4 at [2,2,0]' do
         expect(moon4.coordinates).to eq [2,2,0]
       end
       it 'should have moon4 with velocity [-1,-3,1]' do
-        expect(moon4.velocites).to eq [-1,-3,1]
+        expect(moon4.velocities).to eq [-1,-3,1]
       end
     end
     it 'should have a total energy of 179 after 10 steps' do
@@ -50,7 +50,7 @@ describe Moon do
   describe '#apply_gravity' do
     subject { Moon.new(0,0,0) }
     context 'apply 5,5,5' do
-      let(:moon) { Moon.new(1,1,1,1) }
+      let(:moon) { Moon.new(1,1,1) }
       it 'after step, velocity should be 1,1,1' do
         subject.apply_gravity(moon)
         subject.step
@@ -65,31 +65,32 @@ describe Moon do
     end
     it 'should return 6 after applying gravity of a moon on (5,2,-5)' do
       subject.apply_gravity(Moon.new(5,2,-5))
-      # velocity = -1,-1,1
+      # velocity = 1,1,-1
       subject.step
-      expect(subject.total_energy).to eq 6
+      # position = 2,2,0
+      expect(subject.total_energy).to eq 12
     end
     it 'should return 48 after applying gravity of a moon on (5,2,-5) twice' do
       subject.apply_gravity(Moon.new(5,2,-5))
-      # velocity = -1,-1,1
+      # velocity = 1,1,-1
       subject.step
-      # position 0,0,2
+      # position 2,2,0
       subject.apply_gravity(Moon.new(5,2,-5))
-      # velocity = -2,-2,2
+      # velocity = 2,1,-2
       subject.step
-      # position -2,-2,4
-      expect(subject.total_energy).to eq 48
+      # position 4,3,-2
+      expect(subject.total_energy).to eq 45
     end
     it 'should return 15 after stepping through applying gravity of two moons' do
       subject.apply_gravity(Moon.new(5,2,-5))
-      # velocity = -1,-1,1
+      # velocity = 1,1,-1
       subject.step
-      # position 0,0,2
+      # position 2,2,0
       subject.apply_gravity(Moon.new(-1,0,1))
-      # velocity = 0,-1,2
+      # velocity = 0,0,0
       subject.step
-      # position 0,0,5
-      expect(subject.total_energy).to eq 15
+      # position 2,2,0
+      expect(subject.total_energy).to eq 0
     end
   end
 end

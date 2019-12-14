@@ -12,7 +12,7 @@ class Moon
     [@x, @y, @z]
   end
 
-  def velocites
+  def velocities
     [@vx, @vy, @vz]
   end
 
@@ -23,9 +23,10 @@ class Moon
   end
 
   def apply_gravity(moon)
-    @delta_vx += (@x <=> moon.x)
-    @delta_vy += (@y <=> moon.y)
-    @delta_vz += (@z <=> moon.z)
+    # if my coordinate is lower, I need +1
+    @delta_vx += -(@x <=> moon.x)
+    @delta_vy += -(@y <=> moon.y)
+    @delta_vz += -(@z <=> moon.z)
   end
 
   def step
