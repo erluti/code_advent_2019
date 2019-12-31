@@ -48,13 +48,15 @@ end
 if __FILE__ == $0
   factory = NanoFactory.new(DATA.read)
 
-  print "Requried ORE for 1 FUEL is: #{factory.ore_required}\n\n"
+  ore_for_one_fuel = factory.ore_required
+  print "Requried ORE for 1 FUEL is: #{ore_for_one_fuel}\n\n"
 
+  one_trillion = 1_000_000_000_000
   max_fuel = 1
-  while factory.ore_used < 1_000_000_000_000 # one trillion
-    factory.get_chemical('FUEL')
+  while factory.ore_used < one_trillion
+    factory.get_chemical('FUEL', 1)
     max_fuel += 1
-    if max_fuel % 10 == 0
+    if max_fuel % 1000 == 0
       print "."
     end
   end
