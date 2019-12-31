@@ -16,27 +16,25 @@ class NanoFactory
     end
   end
 
-  def get_chemical(name)
+  def get_chemical(name, amount)
     if name == 'ORE'
-      @ore_used += 1
+      @ore_used += amount
       return 'ORE' #actually we don't want anything returned i think?
     end
-    if @stored_chemicals[name] < 1
+    while @stored_chemicals[name] < amount
       # get_chemicals to produce 'name'
       @stored_chemicals[name] += @formulas[name][:produced]
       @formulas[name][:sources].each do |source_chem|
-        source_chem[:amount].times do
-          get_chemical(source_chem[:name])
-        end
+        get_chemical(source_chem[:name], source_chem[:amount])
       end
     end
 
-    @stored_chemicals[name] -= 1
+    @stored_chemicals[name] -= amount
     name #returning the chemical name like we are returning the chemical from the nanofactory
   end
 
   def ore_required #hack to reuse failed solution structure
-    get_chemical('FUEL')
+    get_chemical('FUEL', 1)
     @ore_used
   end
 
@@ -51,14 +49,17 @@ if __FILE__ == $0
   factory = NanoFactory.new(DATA.read)
 
   print "Requried ORE for 1 FUEL is: #{factory.ore_required}\n\n"
-  # TODO add some output and/or some optimization, the brute forcey-ness is SLLLLLOOOOOOOOWWWWWW
+
   max_fuel = 1
   while factory.ore_used < 1_000_000_000_000 # one trillion
     factory.get_chemical('FUEL')
     max_fuel += 1
+    if max_fuel % 10 == 0
+      print "."
+    end
   end
   # subtract 1, because that was the fuel that put us over capacity
-  print "Max FUEL is: #{max_fuel - 1}\n\n"
+  print "\nMax FUEL is: #{max_fuel - 1}\n\n"
 end
 
 __END__
