@@ -19,7 +19,7 @@ class NanoFactory
   def get_chemical(name, amount)
     if name == 'ORE'
       @ore_used += amount
-      return 'ORE' #actually we don't want anything returned i think?
+      return 'ORE' # this just says "we're done"
     end
     while @stored_chemicals[name] < amount
       # get_chemicals to produce 'name'
@@ -52,13 +52,18 @@ if __FILE__ == $0
   print "Requried ORE for 1 FUEL is: #{ore_for_one_fuel}\n\n"
 
   one_trillion = 1_000_000_000_000
+  approximate_amount = one_trillion / ore_for_one_fuel
   max_fuel = 1
   while factory.ore_used < one_trillion
-    factory.get_chemical('FUEL', 1)
-    max_fuel += 1
-    if max_fuel % 1000 == 0
-      print "."
-    end
+    chunk =
+      if max_fuel < approximate_amount - 100
+        (approximate_amount - max_fuel) / 2
+      else
+        1
+      end
+    print "Using #{max_fuel}, use #{chunk} more.\n"
+    factory.get_chemical('FUEL', chunk)
+    max_fuel += chunk
   end
   # subtract 1, because that was the fuel that put us over capacity
   print "\nMax FUEL is: #{max_fuel - 1}\n\n"
