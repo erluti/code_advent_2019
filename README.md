@@ -7,3 +7,7 @@ Day2 mentioned reusing the work there, so when that happens, I'll probably do so
 ----
 
 Day9: After all the work I put into refactoring day7 to support threading IntcodePrograms for ProgramSeries, I decided I would restructure the repo a little.  Still doing a `dayX.rb` for each day to solve the problem.  But I've created the directory `intcode` to iterate on the IntcodeProgram.  The specs for each component are a lot messier than I would typically design, but they are mostly based on the example provided.
+
+----
+
+Day14: My solution didn't work and the busyness of the holidays overtook me.  I'm still going to try to finish, but at this point I'm content with just the first star for part 1.  I'm still glad to have worked on these, but getting behind makes it less fun and more of a chore. ¯\_(ツ)_/¯
