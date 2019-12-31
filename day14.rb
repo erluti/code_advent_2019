@@ -1,7 +1,10 @@
 require 'byebug'
 
 class NanoFactory
+  attr_reader :ore_used
   def initialize(reactions_text)
+    @ore_used = 0
+    @stored_chemicals = Hash.new { |h,k| h[k] = 0 }
     reactions = reactions_text.split("\n")
     @formulas = {}
     reactions.each do |reaction|
@@ -13,32 +16,34 @@ class NanoFactory
     end
   end
 
-  def ore_required
-    reduciables = [ { name: 'FUEL', amount: @formulas['FUEL'][:produced] }] # should be 1 produced
-    total_ore = 0
-    while reduciables.any?
-      reduciables = reduciables.flat_map { |component| reduce(component) }
-      total_ore += reduciables.collect { |reduciable| reduciable[:name] == 'ORE' ? reduciable[:amount] : 0 }.sum
-      reduciables.reject! { |reduciable| reduciable[:name] == 'ORE' }
+  def get_chemical(name)
+    if name == 'ORE'
+      @ore_used += 1
+      return 'ORE' #actually we don't want anything returned i think?
     end
-    total_ore
+    if @stored_chemicals[name] < 1
+      # get_chemicals to produce 'name'
+      @stored_chemicals[name] += @formulas[name][:produced]
+      @formulas[name][:sources].each do |source_chem|
+        source_chem[:amount].times do
+          get_chemical(source_chem[:name])
+        end
+      end
+    end
+
+    @stored_chemicals[name] -= 1
+    name #returning the chemical name like we are returning the chemical from the nanofactory
   end
 
-  def reduce(chemical_to_reduce)
-    name = chemical_to_reduce[:name]
-    multiplier = round_div(chemical_to_reduce[:amount], @formulas[name][:produced])
-    @formulas[name][:sources].collect { |source| { name: source[:name], amount: source[:amount] * multiplier } }
+  def ore_required #hack to reuse failed solution structure
+    get_chemical('FUEL')
+    @ore_used
   end
 
 private
   def portioned_chemical(string)
     amount, name = string.split(' ')
     {name: name, amount: amount.to_i}
-  end
-
-  # divides and rounds up the number, source https://stackoverflow.com/a/36917763
-  def round_div(x,y)
-    (x + y / 2) / y
   end
 end
 
