@@ -42,14 +42,22 @@ class Map
 end
 
 if __FILE__ == $0
-  map = Map.new(75)
+  map = Map.new(60)
   intcode = DATA.readline
-  # input = [N,E,E,S,E,S,W]
   input = [N,E,S,W]
   while input.length < 100_000
     input += input.dup
   end
   input.shuffle!
+  ideal_input = input.dup
+  ideal_index = 0
+
+  # TODO do random inputs until we get an "ideal_input" that includes the OXYGEN_SYSTEM
+  # remove anything before crossing start
+  # remove sequences that undo eachother example: (E,W) or (N,E,S,W)
+  # remove random values from ideal_input and reuse to find new ideals with less moves
+  # must be less than 500, will be greater than 200
+  # repeat until removing any one move fails?
 
   mapper_input = IntcodeIO.new(input)
   repair_mapper = IntcodeProgram.new(intcode, input: mapper_input)
@@ -64,7 +72,7 @@ if __FILE__ == $0
   result = repair_mapper.output
   position_x, position_y = map.size/2, map.size/2
   map.map(position_x, position_y, START)
-  input.each_with_index do |direction, output|
+  input.each_with_index do |direction, index|
     new_x, new_y = position_x, position_y
     case direction
     when NORTH
@@ -78,19 +86,24 @@ if __FILE__ == $0
     end
 
     if new_x < 0 || new_y < 0
-      print "after #{output} moves, we're out of bounds\n"
+      print "after #{index + 1} moves, we're out of bounds\n"
       break
     end
 
-    case result[output]
+    case result[index]
     when 0 # wall
       map.map(new_x, new_y, WALL)
+      ideal_input.delete_at(ideal_index)
     when 1 # successful move
       position_x, position_y = new_x, new_y
       map.map(position_x, position_y, EMPTY)
+      ideal_index += 1
     when 2 # oxygen system
       position_x, position_y = new_x, new_y
       map.map(position_x, position_y, OXYGEN_SYSTEM)
+      ideal_index += 1
+      ideal_input = input[0, ideal_index + 1]
+      break
     end
   end
   map.map(position_x, position_y, result.last == 2 ? DROID_ON_OXYGEN_SYSTEM : DROID)
