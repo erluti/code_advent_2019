@@ -23,28 +23,40 @@ class Map
   end
 
   def to_s
+    max = size - 1
     string = ''
-    #check grid rows from size to 0
-    (0..size).to_a.reverse.each do |row|
-      if @grid[row]
-        #join column into a display
+    #check grid rows from max to 0
+    (0..max).to_a.reverse.each do |row|
+      if @grid[row].any?
+        (0..max).each do |column|
+          string += (@grid[row][column] || '?')
+        end
       else
-        #display blanks
+        size.times { string += '?'}
       end
-      string += '\n'
+      string += "\n"
     end
+    string
   end
 end
 
 if __FILE__ == $0
-  map = Map.new(100)
+  map = Map.new(20)
   intcode = DATA.readline
   input = [N,E,S,W]
-  repair_mapper = IntcodeProgram.new(intcode, input: IntcodeIO.new(input))
-  repair_mapper.run
 
-  result = repair_mapper.output.values
-  position_x, position_y = map_size/2, map_size/2
+  mapper_input = IntcodeIO.new(input)
+  repair_mapper = IntcodeProgram.new(intcode, input: mapper_input)
+  t = Thread.new do
+    repair_mapper.run
+  end
+  while mapper_input.values.any?
+    sleep 0.0000001
+  end
+  t.kill
+
+  result = repair_mapper.output
+  position_x, position_y = map.size/2, map.size/2
   input.each_with_index do |direction, output|
     new_x, new_y = position_x, position_y
     case direction
@@ -69,6 +81,7 @@ if __FILE__ == $0
       map.map(position_x, position_y, OXYGEN_SYSTEM)
     end
   end
+  map.map(position_x, position_y, result.last == 2 ? DROID_ON_OXYGEN_SYSTEM : DROID)
 
   print map.to_s
 end
