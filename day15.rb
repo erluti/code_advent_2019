@@ -11,19 +11,40 @@ SOUTH = S = 2
 WEST = W = 3
 EAST = E = 4
 
-@grid = Hash.new { |h,k| h[k] = [] }
-def map(x,y,representation)
-  @grid[x][y] = representation
+class Map
+  attr_reader :size
+  def initialize(size)
+    @size = size
+    @grid = Hash.new { |h,k| h[k] = [] }
+  end
+
+  def map(x,y,representation)
+    @grid[y][x] = representation
+  end
+
+  def to_s
+    string = ''
+    #check grid rows from size to 0
+    (0..size).to_a.reverse.each do |row|
+      if @grid[row]
+        #join column into a display
+      else
+        #display blanks
+      end
+      string += '\n'
+    end
+  end
 end
 
 if __FILE__ == $0
+  map = Map.new(100)
   intcode = DATA.readline
   input = [N,E,S,W]
   repair_mapper = IntcodeProgram.new(intcode, input: IntcodeIO.new(input))
   repair_mapper.run
 
   result = repair_mapper.output.values
-  position_x, position_y = 0, 0
+  position_x, position_y = map_size/2, map_size/2
   input.each_with_index do |direction, output|
     new_x, new_y = position_x, position_y
     case direction
@@ -39,17 +60,17 @@ if __FILE__ == $0
 
     case result[output]
     when 0 # wall
-      map(new_x, new_y, WALL)
+      map.map(new_x, new_y, WALL)
     when 1 # successful move
       position_x, position_y = new_x, new_y
-      map(position_x, position_y, EMPTY)
+      map.map(position_x, position_y, EMPTY)
     when 2 # oxygen system
       position_x, position_y = new_x, new_y
-      map(position_x, position_y, OXYGEN_SYSTEM)
+      map.map(position_x, position_y, OXYGEN_SYSTEM)
     end
   end
 
-  # TODO display @grid
+  print map.to_s
 end
 
 __END__
