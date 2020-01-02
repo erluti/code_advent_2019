@@ -47,13 +47,13 @@ if __FILE__ == $0
 
   mapper_input = IntcodeIO.new(input)
   repair_mapper = IntcodeProgram.new(intcode, input: mapper_input)
-  t = Thread.new do
+
+  begin
     repair_mapper.run
+  rescue InputDry
+    # mapper intcode program runs infinitely, so we'll just let it
+    #   die when it's done processing all the inputs
   end
-  while mapper_input.values.any?
-    sleep 0.0000001
-  end
-  t.kill
 
   result = repair_mapper.output
   position_x, position_y = map.size/2, map.size/2
