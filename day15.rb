@@ -1,6 +1,7 @@
 require './intcode/intcode_program.rb'
 
 EMPTY = ' '
+START = 'o'
 WALL = '█'
 OXYGEN_SYSTEM = 'x'
 DROID = '*'
@@ -19,7 +20,7 @@ class Map
   end
 
   def map(x,y,representation)
-    @grid[y][x] = representation
+    @grid[y][x] = representation unless @grid[y][x] == START
   end
 
   def to_s
@@ -41,9 +42,14 @@ class Map
 end
 
 if __FILE__ == $0
-  map = Map.new(20)
+  map = Map.new(75)
   intcode = DATA.readline
+  # input = [N,E,E,S,E,S,W]
   input = [N,E,S,W]
+  while input.length < 100_000
+    input += input.dup
+  end
+  input.shuffle!
 
   mapper_input = IntcodeIO.new(input)
   repair_mapper = IntcodeProgram.new(intcode, input: mapper_input)
@@ -57,6 +63,7 @@ if __FILE__ == $0
 
   result = repair_mapper.output
   position_x, position_y = map.size/2, map.size/2
+  map.map(position_x, position_y, START)
   input.each_with_index do |direction, output|
     new_x, new_y = position_x, position_y
     case direction
@@ -68,6 +75,11 @@ if __FILE__ == $0
       new_x += 1
     when WEST
       new_x -= 1
+    end
+
+    if new_x < 0 || new_y < 0
+      print "after #{output} moves, we're out of bounds\n"
+      break
     end
 
     case result[output]
