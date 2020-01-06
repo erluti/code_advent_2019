@@ -118,7 +118,7 @@ if __FILE__ == $0
 
   # raise "didn't find it" unless found_system
 
-  print "Shortest Path Length: #{ideal_input.length}"
+  print "Shortest Path Length: #{ideal_input.length}\n"
 
   # eliminate 'loops', where point is crossed again
   loop do
