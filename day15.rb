@@ -48,28 +48,20 @@ if __FILE__ == $0
   intcode = DATA.readline
 
   input = [N,E,S,W]
-  while input.length < 100_000
-    input += input.dup
+
+  begin
+    input_data = File.open(INPUT_FILE)
+    print "Intput is from #{INPUT_FILE}...\n"
+    input = input_data.read.split(',').map(&:to_i)
+  rescue Errno::ENOENT
+    while input.length < 100_000
+      input += input.dup
+    end
+    input.shuffle!
   end
-  input.shuffle!
 
-  # begin
-  #   input_data = File.open(INPUT_FILE)
-  #   input = input_data.readline.split(',')
-  # rescue Errno::ENOENT
-  #   while input.length < 100_000
-  #     input += input.dup
-  #   end
-  #   input.shuffle!
-  # end
-  ideal_input = input.dup
-  ideal_index = 0
+  ideal_input = []
 
-  # TODO ideal_input should track locations through the maze for optimizing
-
-  # TODO do random inputs until we get an "ideal_input" that includes the OXYGEN_SYSTEM
-  # remove anything before crossing start
-  # remove sequences that undo eachother example: (E,W) or (N,E,S,W) (track coordinates with each move and eliminate 'loops', where point is crossed again)
   # ? remove random values from ideal_input and reuse to find new ideals with less moves
   # must be less than 500, will be greater than 200
   # ? repeat until removing any one move fails?
@@ -86,7 +78,8 @@ if __FILE__ == $0
 
   result = repair_mapper.output
   found_system = false
-  position_x, position_y = map.size/2, map.size/2
+  origin = [map.size/2, map.size/2]
+  position_x, position_y = origin
   map.map(position_x, position_y, START)
   input.each_with_index do |direction, index|
     new_x, new_y = position_x, position_y
@@ -109,27 +102,50 @@ if __FILE__ == $0
     case result[index]
     when 0 # wall
       map.map(new_x, new_y, WALL)
-      ideal_input.delete_at(ideal_index)
     when 1 # successful move
       position_x, position_y = new_x, new_y
       map.map(position_x, position_y, EMPTY)
-      ideal_index += 1
+      ideal_input << { dir: direction, x: position_x, y: position_y }
     when 2 # oxygen system
       position_x, position_y = new_x, new_y
       map.map(position_x, position_y, OXYGEN_SYSTEM)
-      ideal_index += 1
-      ideal_input = input[0, ideal_index + 1]
+      ideal_input << { dir: direction, x: position_x, y: position_y }
       found_system = true
       break
     end
   end
   map.map(position_x, position_y, result.last == 2 ? DROID_ON_OXYGEN_SYSTEM : DROID)
 
-  raise "didn't find it" unless found_system
+  # raise "didn't find it" unless found_system
 
-  # open(INPUT_FILE, 'w') { |f|
-  #   f.puts ideal_input.join(',')
-  # }
+  print "Shortest Path Length: #{ideal_input.length}"
+
+  # eliminate 'loops', where point is crossed again
+  loop do
+    loop_start = nil
+    loop_end = nil
+    ideal_input.each_with_index do |entry, i|
+      loop_start = i
+      # byebug
+      loop_end = ideal_input.index do |ahead_entry|
+        ahead_entry != entry && ahead_entry[:x] == entry[:x] && ahead_entry[:y] == entry[:y]
+      end
+      break if loop_end
+    end
+    if loop_end
+      print "Eliminate between #{loop_start + 1} and #{loop_end}\n"
+      (loop_start + 1 .. loop_end).each do |i|
+        ideal_input.delete_at(i)
+      end
+    else
+      break # no more loops
+    end
+  end
+
+  # save to "day15.new.data" so I can manipulate stored and used results
+  open(INPUT_FILE.gsub('.', '.new.'), 'w') { |f|
+    f.print ideal_input.collect {|entry| entry[:dir] }.join(',')
+  }
 
   print map.to_s
 end
