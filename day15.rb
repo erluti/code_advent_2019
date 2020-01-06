@@ -12,6 +12,8 @@ SOUTH = S = 2
 WEST = W = 3
 EAST = E = 4
 
+INPUT_FILE = 'day15.data'
+
 class Map
   attr_reader :size
   def initialize(size)
@@ -44,20 +46,33 @@ end
 if __FILE__ == $0
   map = Map.new(60)
   intcode = DATA.readline
+
   input = [N,E,S,W]
   while input.length < 100_000
     input += input.dup
   end
   input.shuffle!
+
+  # begin
+  #   input_data = File.open(INPUT_FILE)
+  #   input = input_data.readline.split(',')
+  # rescue Errno::ENOENT
+  #   while input.length < 100_000
+  #     input += input.dup
+  #   end
+  #   input.shuffle!
+  # end
   ideal_input = input.dup
   ideal_index = 0
 
+  # TODO ideal_input should track locations through the maze for optimizing
+
   # TODO do random inputs until we get an "ideal_input" that includes the OXYGEN_SYSTEM
   # remove anything before crossing start
-  # remove sequences that undo eachother example: (E,W) or (N,E,S,W)
-  # remove random values from ideal_input and reuse to find new ideals with less moves
+  # remove sequences that undo eachother example: (E,W) or (N,E,S,W) (track coordinates with each move and eliminate 'loops', where point is crossed again)
+  # ? remove random values from ideal_input and reuse to find new ideals with less moves
   # must be less than 500, will be greater than 200
-  # repeat until removing any one move fails?
+  # ? repeat until removing any one move fails?
 
   mapper_input = IntcodeIO.new(input)
   repair_mapper = IntcodeProgram.new(intcode, input: mapper_input)
@@ -70,6 +85,7 @@ if __FILE__ == $0
   end
 
   result = repair_mapper.output
+  found_system = false
   position_x, position_y = map.size/2, map.size/2
   map.map(position_x, position_y, START)
   input.each_with_index do |direction, index|
@@ -85,10 +101,10 @@ if __FILE__ == $0
       new_x -= 1
     end
 
-    if new_x < 0 || new_y < 0
-      print "after #{index + 1} moves, we're out of bounds\n"
-      break
-    end
+    # if new_x < 0 || new_y < 0
+    #   print "after #{index + 1} moves, we're out of bounds\n"
+    #   break
+    # end
 
     case result[index]
     when 0 # wall
@@ -103,10 +119,17 @@ if __FILE__ == $0
       map.map(position_x, position_y, OXYGEN_SYSTEM)
       ideal_index += 1
       ideal_input = input[0, ideal_index + 1]
+      found_system = true
       break
     end
   end
   map.map(position_x, position_y, result.last == 2 ? DROID_ON_OXYGEN_SYSTEM : DROID)
+
+  raise "didn't find it" unless found_system
+
+  # open(INPUT_FILE, 'w') { |f|
+  #   f.puts ideal_input.join(',')
+  # }
 
   print map.to_s
 end
