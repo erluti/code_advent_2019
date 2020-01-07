@@ -62,10 +62,6 @@ if __FILE__ == $0
 
   ideal_input = []
 
-  # ? remove random values from ideal_input and reuse to find new ideals with less moves
-  # must be less than 500, will be greater than 200
-  # ? repeat until removing any one move fails?
-
   mapper_input = IntcodeIO.new(input)
   repair_mapper = IntcodeProgram.new(intcode, input: mapper_input)
 
@@ -126,16 +122,22 @@ if __FILE__ == $0
     loop_end = nil
     ideal_input.each_with_index do |entry, i|
       loop_start = i
-      # byebug
-      loop_end = ideal_input.index do |ahead_entry|
-        ahead_entry != entry && ahead_entry[:x] == entry[:x] && ahead_entry[:y] == entry[:y]
+      loop_end_reversed = ideal_input.reverse.index do |ahead_entry|
+        ahead_entry[:x] == entry[:x] && ahead_entry[:y] == entry[:y]
       end
-      break if loop_end
+      if loop_end_reversed
+        loop_end = ideal_input.length - 1 - loop_end_reversed
+      end
+      if loop_end && loop_end > loop_start
+        break
+      else
+        loop_end = nil
+      end
     end
     if loop_end
       print "Eliminate between #{loop_start + 1} and #{loop_end}\n"
-      (loop_start + 1 .. loop_end).each do |i|
-        ideal_input.delete_at(i)
+      (loop_end - loop_start).times do
+        ideal_input.delete_at(loop_start + 1)
       end
     else
       break # no more loops
