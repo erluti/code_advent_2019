@@ -1,6 +1,8 @@
 require_relative 'intcode_io.rb'
 require 'byebug'
 
+class InputDry < StandardError; end
+
 class IntcodeProgram
   attr_reader :intcode
 
@@ -81,7 +83,7 @@ class IntcodeProgram
     if input_value.nil?
       sleep_count = 0
       while input_value.nil?
-        raise "I don't think a value is coming!" if sleep_count >= @sleep_max
+        raise InputDry.new("I don't think a value is coming!") if sleep_count >= @sleep_max
         sleep 0.001
         input_value = @input.read
         sleep_count += 1
