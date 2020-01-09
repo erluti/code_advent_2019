@@ -22,11 +22,11 @@ class SignalCleaner
     @current.join('')
   end
 
-  def fft(phase_count)
+  def fft(phase_count, offset=0)
     phase_count.times do
       fft_phase
     end
-    @current.first(8).join('')
+    @current.slice(offset,8).join('')
   end
 
 private
