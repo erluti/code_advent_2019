@@ -27,15 +27,15 @@ describe SignalCleaner do
   describe 'large inputs with 100 phases' do
     it 'will receive 80871224585914546619083218645595 and after 4 phases return 24176176' do
       subject = SignalCleaner.new(input: '80871224585914546619083218645595')
-      expect(subject.fft(4)).to eq '24176176'
+      expect(subject.fft(100)).to eq '24176176'
     end
     it 'will receive 19617804207202209144916044189917 and after 4 phases return 73745418' do
       subject = SignalCleaner.new(input: '19617804207202209144916044189917')
-      expect(subject.fft(4)).to eq '73745418'
+      expect(subject.fft(100)).to eq '73745418'
     end
     it 'will receive 69317163492948606335995924319873 and after 4 phases return 52432133' do
       subject = SignalCleaner.new(input: '69317163492948606335995924319873')
-      expect(subject.fft(4)).to eq '52432133'
+      expect(subject.fft(100)).to eq '52432133'
     end
   end
 end

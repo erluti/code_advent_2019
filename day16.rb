@@ -22,6 +22,13 @@ class SignalCleaner
     @current.join('')
   end
 
+  def fft(phase_count)
+    phase_count.times do
+      fft_phase
+    end
+    @current.first(8).join('')
+  end
+
 private
   # 1-indexed
   def pattern_for_position(position)
