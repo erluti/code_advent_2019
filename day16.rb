@@ -4,9 +4,12 @@ require 'byebug'
 # create "phaser" that will take an input and return the output, contains the base pattern internally
 class SignalCleaner
   attr_reader :current_phase, :current
-  def initialize(input:)
-    @input = input
-    @current = number_as_array(input)
+  def initialize(input:, repeat: 1)
+    @input = ''
+    repeat.times do
+      @input += input
+    end
+    @current = number_as_array(@input)
     @current_phase = 0
     @base_pattern = [0, 1, 0, -1]
   end
@@ -22,11 +25,12 @@ class SignalCleaner
     @current.join('')
   end
 
-  def fft(phase_count, offset=0)
+  def fft(phase_count, offset: false)
+    offset_value = offset ? @current.first(7).join('').to_i : 0
     phase_count.times do
       fft_phase
     end
-    @current.slice(offset,8).join('')
+    @current.slice(offset_value,8).join('')
   end
 
 private
