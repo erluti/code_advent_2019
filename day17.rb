@@ -1,11 +1,39 @@
 class CameraView
   def initialize(view_array)
+    @rows = []
+    current_row = []
+    view_array.each do |value|
+      if value == 35
+        current_row << '#'
+      elsif value == 46
+        current_row << '.'
+      elsif value == 10
+        @rows << current_row
+        current_row = []
+      else
+        raise "#{value} is not recognized!"
+      end
+    end
   end
 
   def intersections
+    intersections = []
+    max_y = @rows.length - 1
+    max_x = @rows.first.length - 1
+    @rows.each_with_index do |row, y|
+      next if y == 0 || y == max_y
+      row.each_with_index do |value, x|
+        next if x == 0 || x == max_x
+        if value == '#' && row[x - 1] == '#' && row[x + 1] == '#' && @rows[y - 1][x] == '#' && @rows[y + 1][x] == '#'
+          intersections << [x,y]
+        end
+      end
+    end
+    intersections
   end
 
   def alignment_parameters_sum
+    intersections.collect { |x,y| x * y }.sum
   end
 end
 

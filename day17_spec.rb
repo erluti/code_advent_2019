@@ -20,7 +20,12 @@ describe CameraView do
         expect(subject.intersections.count).to eq 4
       end
       it 'should include [2,2], [2,4], [6,4], [10,4]' do
-        expect(subject.intersections).to include([[2,2], [2,4], [6,4], [10,4]])
+        expect(subject.intersections).to include([2,2], [2,4], [6,4], [10,4])
+      end
+    end
+    describe '#alignment_parameters_sum' do
+      it 'should equal 76' do
+        expect(subject.alignment_parameters_sum).to eq 76
       end
     end
   end
