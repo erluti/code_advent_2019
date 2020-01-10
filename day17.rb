@@ -1,13 +1,16 @@
+require './intcode/intcode_program.rb'
+
 class CameraView
   def initialize(view_array)
     @rows = []
     current_row = []
     view_array.each do |value|
-      if value == 35
-        current_row << '#'
-      elsif value == 46
+      case value
+      when '#'.ord, '^'.ord, 'v'.ord, '<'.ord, '>'.ord
+        current_row << '#' # FIXME actually store the representation and not just beams.  will also need an intesection checking method
+      when '.'.ord
         current_row << '.'
-      elsif value == 10
+      when "\n".ord
         @rows << current_row
         current_row = []
       else
@@ -43,6 +46,7 @@ if __FILE__ == $0
   ascii = IntcodeProgram.new(intcode)
   ascii.run
   cv = CameraView.new(ascii.output)
+  print "The sum of the alignment paramters: #{cv.alignment_parameters_sum}\n\n"
 end
 
 __END__
