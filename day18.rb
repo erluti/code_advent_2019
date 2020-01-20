@@ -1,20 +1,35 @@
 require 'byebug'
 
 class VaultMap
-  attr_reader :keys
+  attr_reader :keys, :start
   def initialize(text)
     @map = Hash.new { |h,k| h[k] = [] }
     @keys = []
     text.split("\n").each_with_index do |row, i|
       @map[i] = row.split('')
       @keys += row.scan(/[a-z]/)
+      if position = @map[i].index('@')
+        @start = [position,i]
+      end
     end
     @keys.sort!
+  end
+
+  def location(x,y)
+    @map[y][x]
+  end
+
+  def path_to(key)
+
   end
 
   def steps
     0
   end
+end
+
+class AStarNode
+  attr_accessor :distance_to_start, :heuristic, :total_cost
 end
 
 if __FILE__ == $0

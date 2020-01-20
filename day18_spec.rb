@@ -18,6 +18,9 @@ describe VaultMap do
       it 'should have keys a and b' do
         expect(subject.keys).to eq %w(a b)
       end
+      it 'should have start at 5,1' do
+        expect(subject.start).to eq [5,1]
+      end
     end
 
     context 'example the second' do
