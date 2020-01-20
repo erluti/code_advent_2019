@@ -59,7 +59,7 @@ class Pathfinder # use A* algorithm to find shortest path
 
       # collect key
       current_location = @map.location(current[:location])
-      if @keys_to_get.include?(current_location)
+      if @keys_to_get.include?(current_location) && !current[:keys_collected].include?(current_location)
         current[:keys_collected] << current_location
       end
 
@@ -90,27 +90,44 @@ class Pathfinder # use A* algorithm to find shortest path
           true
         end
       end
+      relevant_closed_list = closed_list.select {|closed_node| closed_node[:keys_collected] == current[:keys_collected]}
+      relevant_open_list = open_list.select {|open_node| open_node[:keys_collected] == current[:keys_collected]}
       children.each do |child_location|
         node = {previous: current, location: child_location, keys_collected: current[:keys_collected].dup}
-        next if closed_list.any? {|closed_node| closed_node[:location] == child_location && closed_node[:keys_collected] == current[:keys_collected]}
+        next if relevant_closed_list.any? {|closed_node| closed_node[:location] == child_location}
         node[:cost] = 1 + current[:cost]
         node[:heuristic] = calculate_heuristic(@keys_to_get - current[:keys_collected], child_location)
         node[:astar] = node[:cost] + node[:heuristic]
 
-        # if child is in the open_list's nodes positions and child cost is higher than the open_list node's cost
-        next if existing_node_index = open_list.index {|open_node| open_node[:location] == child_location  && open_node[:keys_collected] == current[:keys_collected]} && node[:cost] > open_list[existing_node_index][:cost]
+        # if child is in the open_list's nodes positions and child cost is higher than the open_list node's cost skip it
+        next if relevant_open_list.any? {|open_node| open_node[:location] == child_location && open_node[:cost] < node[:cost]}
 
         open_list << node
       end
     end
   end
 
+  def calculate_heuristic_avoid_doors(keys_to_get, current_location)
+    heuristic = 0
+    x, y = current_location
+    keys_to_get.each_with_index do |key, i|
+      one_dex = i + 1
+      next_x, next_y = @map.find(key)
+      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / one_dex
+      # avoid locked doors
+      bad_x, bad_y = @map.find(key.upcase)
+      next if bad_x == nil # no door for some keys
+      heuristic -= (((x - bad_x) ** 2 + (y - bad_y) ** 2) / one_dex) * 2 # better to avoid doors
+    end
+    heuristic
+  end
+
   def calculate_heuristic(keys_to_get, current_location)
     heuristic = 0
     x, y = current_location
-    keys_to_get.reverse.each_with_index do |key, i|
+    keys_to_get.each_with_index do |key, i|
       next_x, next_y = @map.find(key)
-      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) * (i + 1)
+      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / (i + 1)
     end
     heuristic
   end
