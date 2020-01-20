@@ -1,11 +1,15 @@
 require 'byebug'
 
 class VaultMap
+  attr_reader :keys
   def initialize(text)
     @map = Hash.new { |h,k| h[k] = [] }
+    @keys = []
     text.split("\n").each_with_index do |row, i|
       @map[i] = row.split('')
+      @keys += row.scan(/[a-z]/)
     end
+    @keys.sort!
   end
 
   def steps
