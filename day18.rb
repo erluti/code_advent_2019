@@ -2,7 +2,10 @@ require 'byebug'
 
 class VaultMap
   def initialize(text)
-    # turn into model of a map
+    @map = Hash.new { |h,k| h[k] = [] }
+    text.split("\n").each_with_index do |row, i|
+      @map[i] = row.split('')
+    end
   end
 
   def steps
