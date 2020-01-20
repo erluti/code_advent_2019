@@ -1,6 +1,10 @@
 require './day18.rb'
 require 'rspec'
 
+# RSpec.configure do |c|
+#   c.filter_run_including :focus => true
+# end
+
 describe VaultMap do
   context 'Part 1' do
     context 'example the first' do
@@ -40,6 +44,9 @@ describe VaultMap do
       it 'should find 86 steps' do
         expect(subject.steps).to eq 86
       end
+      it 'should have start at 15,1' do
+        expect(subject.start).to eq [15,1]
+      end
     end
 
     context 'example the third' do
@@ -58,6 +65,9 @@ describe VaultMap do
       end
       it 'should find 132 steps' do
         expect(subject.steps).to eq 132
+      end
+      it 'should have start at 6,3' do
+        expect(subject.start).to eq [6,3]
       end
     end
 
@@ -101,6 +111,9 @@ describe VaultMap do
       end
       it 'should find 81 steps' do
         expect(subject.steps).to eq 81
+      end
+      it 'should have start at 1,1' do
+        expect(subject.start).to eq [1,1]
       end
     end
   end

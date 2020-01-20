@@ -15,21 +15,105 @@ class VaultMap
     @keys.sort!
   end
 
-  def location(x,y)
+  def location(x,y=nil)
+    if x.is_a? Array
+      x,y = x
+    end
     @map[y][x]
   end
 
-  def path_to(key)
-
+  def find(value)
+    @map.each_with_index do |row, y|
+      x = row.last.index(value)
+      return [x, y] if x
+    end
+    nil
   end
 
   def steps
-    0
+    Pathfinder.new(self).path.count
   end
 end
 
-class AStarNode
-  attr_accessor :distance_to_start, :heuristic, :total_cost
+class Pathfinder # use A* algorithm to find shortest path
+  def initialize(map)
+    @map = map
+    @location = @map.start
+    @keys_to_get = @map.keys
+    # @keys_collected = []
+  end
+
+  def path
+    # initial algorithm from https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
+    # Initialize both open and closed list
+    open_list = [{astar: 0, cost: 0, location: @location, previous: nil, keys_collected: []}]
+    closed_list = []
+
+    # Loop until you find the end
+    while open_list.any?
+      # let the currentNode equal the node with the least f value
+      current = open_list.min { |node| node[:astar] }
+
+      # remove the currentNode from the open_list
+      open_list.delete(current)
+
+      # collect key
+      current_location = @map.location(current[:location])
+      if @keys_to_get.include?(current_location)
+        current[:keys_collected] << current_location
+      end
+
+      # add the currentNode to the closed_list
+      closed_list << current.dup
+
+      if (@keys_to_get - current[:keys_collected]).empty?
+        path = []
+        while current[:previous]
+          path << current[:location]
+          current = current[:previous]
+        end
+        # the nil previous is the starting position, so it's not part of the path
+        return path
+      end
+
+
+      # let the children of the currentNode equal the adjacent nodes
+      x, y = current[:location]
+      children = [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].select do |point|
+        # false when it's a wall
+        case value = @map.location(point)
+        when '#'
+          false
+        when 'A'..'Z'
+          current[:keys_collected].include?(value.downcase)
+        else
+          true
+        end
+      end
+      children.each do |child_location|
+        node = {previous: current, location: child_location, keys_collected: current[:keys_collected].dup}
+        next if closed_list.any? {|closed_node| closed_node[:location] == child_location && closed_node[:keys_collected] == current[:keys_collected]}
+        node[:cost] = 1 + current[:cost]
+        node[:heuristic] = calculate_heuristic(@keys_to_get - current[:keys_collected], child_location)
+        node[:astar] = node[:cost] + node[:heuristic]
+
+        # if child is in the open_list's nodes positions and child cost is higher than the open_list node's cost
+        next if existing_node_index = open_list.index {|open_node| open_node[:location] == child_location  && open_node[:keys_collected] == current[:keys_collected]} && node[:cost] > open_list[existing_node_index][:cost]
+
+        open_list << node
+      end
+    end
+  end
+
+  def calculate_heuristic(keys_to_get, current_location)
+    heuristic = 0
+    x, y = current_location
+    keys_to_get.reverse.each_with_index do |key, i|
+      next_x, next_y = @map.find(key)
+      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) * (i + 1)
+    end
+    heuristic
+  end
 end
 
 if __FILE__ == $0
