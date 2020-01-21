@@ -49,18 +49,15 @@ class Pathfinder # use A* algorithm to find shortest path
     give_up = Time.now + GIVE_UP_SECONDS
     # initial algorithm from https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
     # Initialize both open and closed list
-    # REVIEW - these lists could be hashes indexed by keys collects to handle the "relevant_list" bit below
-    open_list = [{astar: 0, cost: 0, location: @location, previous: nil, keys_collected: []}]
-    closed_list = []
+    open_list = NodeList.new
+    open_list.add({astar: 0, cost: 0, location: @location, previous: nil, keys_collected: []})
+    closed_list = NodeList.new
 
     # Loop until you find the end
     while open_list.any?
       raise "It's taking forever! (aka more than #{GIVE_UP_SECONDS} seconds)" if Time.now > give_up
-      # let the currentNode equal the node with the least f value
-      current = open_list.min { |node| node[:astar] }
-
-      # remove the currentNode from the open_list
-      open_list.delete(current)
+      # let the currentNode equal the node with the least astar value
+      current = open_list.next!
 
       # collect key
       current_location = @map.location(current[:location])
@@ -69,7 +66,7 @@ class Pathfinder # use A* algorithm to find shortest path
       end
 
       # add the currentNode to the closed_list
-      closed_list << current.dup
+      closed_list.add(current.dup)
 
       if (@keys_to_get - current[:keys_collected]).empty?
         path = []
@@ -95,19 +92,19 @@ class Pathfinder # use A* algorithm to find shortest path
           true
         end
       end
-      relevant_closed_list = closed_list.select {|closed_node| closed_node[:keys_collected] == current[:keys_collected]}
-      relevant_open_list = open_list.select {|open_node| open_node[:keys_collected] == current[:keys_collected]}
+
       children.each do |child_location|
         node = {previous: current, location: child_location, keys_collected: current[:keys_collected].dup}
-        next if relevant_closed_list.any? {|closed_node| closed_node[:location] == child_location}
+        next if closed_list.contains?(node)
         node[:cost] = 1 + current[:cost]
-        node[:heuristic] = calculate_heuristic(@keys_to_get - current[:keys_collected], child_location)
+        node[:heuristic] = calculate_heuristic(@keys_to_get - current[:keys_collected], child_location) / 1000
+        # node[:heuristic] = (calculate_heuristic_avoid_doors(@keys_to_get - current[:keys_collected], child_location) + calculate_heuristic_by_keys_away_from_doors(@keys_to_get - current[:keys_collected], child_location)) / 2000
         node[:astar] = node[:cost] + node[:heuristic]
 
         # if child is in the open_list's nodes positions and child cost is higher than the open_list node's cost skip it
-        next if relevant_open_list.any? {|open_node| open_node[:location] == child_location && open_node[:cost] < node[:cost]}
+        next if open_list.contains_better?(node)
 
-        open_list << node
+        open_list.add(node)
       end
     end
   end
@@ -170,6 +167,36 @@ class Pathfinder # use A* algorithm to find shortest path
       heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / (i + 1)
     end
     heuristic
+  end
+end
+
+class NodeList
+  def initialize
+    # REVIEW - could be hashes indexed by keys collected to handle the "relevant_list" bit below
+    @list = []
+  end
+
+  # removes a node with lowest astar and returns it
+  def next!
+    node = @list.min { |node| node[:astar] }
+    @list.delete(node)
+  end
+
+  def add(new_node)
+    @list << new_node
+  end
+
+  def contains?(current)
+    @list.select {|node| node[:keys_collected] == current[:keys_collected]}.any? {|node| node[:location] == current[:location]}
+  end
+
+  def contains_better?(current)
+    # returns true if a similar node is listed with a lower astar
+    @list.select {|node| node[:keys_collected] == current[:keys_collected]}.any? {|node| node[:location] == current[:location] && node[:cost] > current[:cost]}
+  end
+
+  def any?
+    @list.any?
   end
 end
 
