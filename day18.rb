@@ -1,5 +1,7 @@
 require 'byebug'
 
+GIVE_UP_SECONDS = 15
+
 class VaultMap
   attr_reader :keys, :start
   def initialize(text)
@@ -44,13 +46,16 @@ class Pathfinder # use A* algorithm to find shortest path
   end
 
   def path
+    give_up = Time.now + GIVE_UP_SECONDS
     # initial algorithm from https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
     # Initialize both open and closed list
+    # REVIEW - these lists could be hashes indexed by keys collects to handle the "relevant_list" bit below
     open_list = [{astar: 0, cost: 0, location: @location, previous: nil, keys_collected: []}]
     closed_list = []
 
     # Loop until you find the end
     while open_list.any?
+      raise "It's taking forever! (aka more than #{GIVE_UP_SECONDS} seconds)" if Time.now > give_up
       # let the currentNode equal the node with the least f value
       current = open_list.min { |node| node[:astar] }
 
@@ -107,6 +112,16 @@ class Pathfinder # use A* algorithm to find shortest path
     end
   end
 
+  def calculate_heuristic(keys_to_get, current_location)
+    heuristic = 0
+    x, y = current_location
+    keys_to_get.each_with_index do |key, i|
+      next_x, next_y = @map.find(key)
+      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / (i + 1)
+    end
+    heuristic
+  end
+
   def calculate_heuristic_avoid_doors(keys_to_get, current_location)
     heuristic = 0
     x, y = current_location
@@ -122,10 +137,35 @@ class Pathfinder # use A* algorithm to find shortest path
     heuristic
   end
 
-  def calculate_heuristic(keys_to_get, current_location)
+  def calculate_heuristic_by_keys_away_from_doors(keys_to_get, current_location)
+    # pursue keys that are farther from their doors first
     heuristic = 0
     x, y = current_location
-    keys_to_get.each_with_index do |key, i|
+    keys_to_get.sort! do |key1, key2|
+      door1 = @map.find(key1.upcase)
+      door2 = @map.find(key2.upcase)
+      if door1.nil?
+        if door2.nil?
+          # no doors, favor closer one
+          key1_loc = @map.find(key1)
+          key2_loc = @map.find(key2)
+          ((x - key1_loc.first) ** 2 + (y - key1_loc.last) ** 2) <=> ((x - key2_loc.first) ** 2 + (y - key2_loc.last) ** 2)
+        else
+          # key1 has no door, favor key2
+          1
+        end
+      else
+        if door2.nil?
+          # key2 has no door, favor key1
+          -1
+        else
+          # both have doors, favor key farthest from it's door
+          key1_loc = @map.find(key1)
+          key2_loc = @map.find(key2)
+          ((door1.first - key1_loc.first) ** 2 + (door1.last - key1_loc.last) ** 2) <=> ((door2.first - key2_loc.first) ** 2 + (door2.last - key2_loc.last) ** 2)
+        end
+      end
+    end.each_with_index do |key, i|
       next_x, next_y = @map.find(key)
       heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / (i + 1)
     end

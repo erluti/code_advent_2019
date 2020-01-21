@@ -1,9 +1,9 @@
 require './day18.rb'
 require 'rspec'
 
-RSpec.configure do |c|
-  c.filter_run_including :focus => true
-end
+# RSpec.configure do |c|
+#   c.filter_run_including :focus => true
+# end
 
 describe VaultMap do
   context 'Part 1' do
@@ -63,7 +63,7 @@ describe VaultMap do
       it 'should have keys a-g' do
         expect(subject.keys).to eq %w(a b c d e f g)
       end
-      fit 'should find 132 steps' do
+      it 'should find 132 steps' do
         expect(subject.steps).to eq 132
       end
       it 'should have start at 6,3' do
