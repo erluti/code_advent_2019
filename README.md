@@ -21,3 +21,7 @@ Day15: After trying to be clever, I decided I'd create a bunch of random inputs 
 Looking at Part 2 I realized that I would need a better mapping algorithm than random input to find the entire map.  So I think I'll punt on Part 2.
 
 The biggest challenge was I didn't use any of my expertise as a Software Engineer, instead thinking I could quickly solve it without making smart classes and tests.  Everytime I thought "I should make this an object" and I decided I was too cool and said "Well, this one tweak will make it work."  But then I ended up spending way longer on this than I wanted when I could have quickly solved this by tweaking well-tested methods.  So I'm going to not try to be too clever when I do Day 16, and be better with my best practices.
+
+----
+
+Day18: Implemented an A* path-finding algorithm!  It works, but layering it so that doors are sometimes walls has made it process really slowly for the more challenging exmaples.  I'm toying with the heuristic part of the algorithm.
