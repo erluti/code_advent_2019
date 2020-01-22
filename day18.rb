@@ -93,7 +93,7 @@ class Pathfinder # use A* algorithm to find shortest path
         node = {path: current[:path] + [current[:location]], location: child_location, keys_collected: keys_collected}
         next if closed_list.contains?(node)
         node[:cost] = 1 + current[:cost]
-        node[:heuristic] = calculate_heuristic(missing_keys, child_location)# * (missing_keys.count.to_f / @keys_to_get.count)
+        node[:heuristic] = calculate_heuristic(missing_keys, child_location)# * (1 + (missing_keys.count.to_f / @keys_to_get.count))
         node[:astar] = node[:cost] + node[:heuristic]
 
         # if child is in the open_list's nodes positions and child cost is higher than the open_list node's cost skip it
@@ -104,12 +104,15 @@ class Pathfinder # use A* algorithm to find shortest path
     end
   end
 
+  # lower valued heuristics are choosen to traverse first
+  # if it never overestimates the actual cost to get to the goal, it guarantees shortest path
   def calculate_heuristic(keys_to_get, current_location)
     heuristic = 0
     x, y = current_location
     keys_to_get.each_with_index do |key, i|
       next_x, next_y = @map.find(key)
-      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / (i + 1)
+      # a^2 + b^2 approximates distance from current_location
+      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / (1 + i) # dividing by this index factor prioritizes far away keys
     end
     heuristic
   end
@@ -124,7 +127,7 @@ class Pathfinder # use A* algorithm to find shortest path
       # avoid locked doors
       bad_x, bad_y = @map.find(key.upcase)
       next if bad_x == nil # no door for some keys
-      heuristic -= (((x - bad_x) ** 2 + (y - bad_y) ** 2) / one_dex) # * 2 # better to avoid doors
+      heuristic -= (((x - bad_x) ** 2 + (y - bad_y) ** 2) / one_dex) / 2 # better to avoid doors
     end
     heuristic
   end
@@ -159,7 +162,7 @@ class Pathfinder # use A* algorithm to find shortest path
       end
     end.each_with_index do |key, i|
       next_x, next_y = @map.find(key)
-      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / (i + 1)
+      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) * (i + 1)
     end
     heuristic
   end
