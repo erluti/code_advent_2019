@@ -33,7 +33,7 @@ class VaultMap
   end
 
   def steps
-    Pathfinder.new(self).path.count
+    path = Pathfinder.new(self).path.count
   end
 end
 
@@ -58,16 +58,17 @@ class Pathfinder # use A* algorithm to find shortest path
       # let the currentNode equal the node with the least astar value
       current = open_list.next!
 
+      keys_collected = current[:keys_collected].dup
       # collect key
       current_location = @map.location(current[:location])
-      if @keys_to_get.include?(current_location) && !current[:keys_collected].include?(current_location)
-        current[:keys_collected] << current_location
+      if @keys_to_get.include?(current_location) && !keys_collected.include?(current_location)
+        keys_collected << current_location
       end
 
       # add the currentNode to the closed_list
       closed_list.add(current.dup)
 
-      if (@keys_to_get - current[:keys_collected]).empty?
+      if (@keys_to_get - keys_collected).empty?
         return current[:path]
       end
 
@@ -80,18 +81,19 @@ class Pathfinder # use A* algorithm to find shortest path
         when '#'
           false
         when 'A'..'Z'
-          current[:keys_collected].include?(value.downcase)
+          keys_collected.include?(value.downcase)
         else
           true
         end
       end
 
+      missing_keys = @keys_to_get - keys_collected
+
       children.each do |child_location|
-        node = {path: current[:path] + [current[:location]], location: child_location, keys_collected: current[:keys_collected].dup}
+        node = {path: current[:path] + [current[:location]], location: child_location, keys_collected: keys_collected}
         next if closed_list.contains?(node)
         node[:cost] = 1 + current[:cost]
-        node[:heuristic] = calculate_heuristic(@keys_to_get - current[:keys_collected], child_location) / 1000.0
-        # node[:heuristic] = (calculate_heuristic_avoid_doors(@keys_to_get - current[:keys_collected], child_location) + calculate_heuristic_by_keys_away_from_doors(@keys_to_get - current[:keys_collected], child_location)) / 2000
+        node[:heuristic] = calculate_heuristic(missing_keys, child_location)# * (missing_keys.count.to_f / @keys_to_get.count)
         node[:astar] = node[:cost] + node[:heuristic]
 
         # if child is in the open_list's nodes positions and child cost is higher than the open_list node's cost skip it
@@ -122,7 +124,7 @@ class Pathfinder # use A* algorithm to find shortest path
       # avoid locked doors
       bad_x, bad_y = @map.find(key.upcase)
       next if bad_x == nil # no door for some keys
-      heuristic -= (((x - bad_x) ** 2 + (y - bad_y) ** 2) / one_dex) * 2 # better to avoid doors
+      heuristic -= (((x - bad_x) ** 2 + (y - bad_y) ** 2) / one_dex) # * 2 # better to avoid doors
     end
     heuristic
   end
