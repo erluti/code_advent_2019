@@ -42,7 +42,6 @@ class Pathfinder # use A* algorithm to find shortest path
     @map = map
     @location = @map.start
     @keys_to_get = @map.keys
-    # @keys_collected = []
   end
 
   def path
@@ -50,7 +49,7 @@ class Pathfinder # use A* algorithm to find shortest path
     # initial algorithm from https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
     # Initialize both open and closed list
     open_list = NodeList.new
-    open_list.add({astar: 0, cost: 0, location: @location, previous: nil, keys_collected: []})
+    open_list.add({astar: 0, cost: 0, location: @location, path: [], keys_collected: []})
     closed_list = NodeList.new
 
     # Loop until you find the end
@@ -69,13 +68,7 @@ class Pathfinder # use A* algorithm to find shortest path
       closed_list.add(current.dup)
 
       if (@keys_to_get - current[:keys_collected]).empty?
-        path = []
-        while current[:previous]
-          path << current[:location]
-          current = current[:previous]
-        end
-        # the nil previous is the starting position, so it's not part of the path
-        return path
+        return current[:path]
       end
 
 
@@ -94,10 +87,10 @@ class Pathfinder # use A* algorithm to find shortest path
       end
 
       children.each do |child_location|
-        node = {previous: current, location: child_location, keys_collected: current[:keys_collected].dup}
+        node = {path: current[:path] + [current[:location]], location: child_location, keys_collected: current[:keys_collected].dup}
         next if closed_list.contains?(node)
         node[:cost] = 1 + current[:cost]
-        node[:heuristic] = calculate_heuristic(@keys_to_get - current[:keys_collected], child_location) / 1000
+        node[:heuristic] = calculate_heuristic(@keys_to_get - current[:keys_collected], child_location) / 1000.0
         # node[:heuristic] = (calculate_heuristic_avoid_doors(@keys_to_get - current[:keys_collected], child_location) + calculate_heuristic_by_keys_away_from_doors(@keys_to_get - current[:keys_collected], child_location)) / 2000
         node[:astar] = node[:cost] + node[:heuristic]
 
@@ -172,31 +165,40 @@ end
 
 class NodeList
   def initialize
-    # REVIEW - could be hashes indexed by keys collected to handle the "relevant_list" bit below
-    @list = []
+    @list = Hash.new {|h,k| h[k] = []}
   end
 
   # removes a node with lowest astar and returns it
   def next!
-    node = @list.min { |node| node[:astar] }
-    @list.delete(node)
+    node = nil
+    node_list = nil
+    @list.each_value do |collection|
+      next if collection.empty?
+      lowest = collection.min { |node| node[:astar] }
+      if node.nil? || lowest[:astar] < node[:astar]
+        node = lowest
+        node_list = collection
+      end
+    end
+    node_list.delete(node) if node
+    node
   end
 
   def add(new_node)
-    @list << new_node
+    @list[new_node[:keys_collected]] << new_node
   end
 
   def contains?(current)
-    @list.select {|node| node[:keys_collected] == current[:keys_collected]}.any? {|node| node[:location] == current[:location]}
+    @list[current[:keys_collected]].any? {|node| node[:location] == current[:location]}
   end
 
   def contains_better?(current)
     # returns true if a similar node is listed with a lower astar
-    @list.select {|node| node[:keys_collected] == current[:keys_collected]}.any? {|node| node[:location] == current[:location] && node[:cost] > current[:cost]}
+    @list[current[:keys_collected]].any? {|node| node[:location] == current[:location] && node[:cost] > current[:cost]}
   end
 
   def any?
-    @list.any?
+    @list.values.any?(&:any?)
   end
 end
 
