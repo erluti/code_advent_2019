@@ -107,6 +107,7 @@ class Pathfinder # use A* algorithm to find shortest path
   # lower valued heuristics are choosen to traverse first
   # if it never overestimates the actual cost to get to the goal, it guarantees shortest path
   def calculate_heuristic(keys_to_get, current_location)
+    # try sum of (straight-line) distance to all keys
     heuristic = 0
     x, y = current_location
     keys_to_get.each_with_index do |key, i|
@@ -118,6 +119,7 @@ class Pathfinder # use A* algorithm to find shortest path
   end
 
   def calculate_heuristic_avoid_doors(keys_to_get, current_location)
+    # try sum fo distance to all keys plus distance of keys to their doors (distance to door might need to be path distance)
     heuristic = 0
     x, y = current_location
     keys_to_get.each_with_index do |key, i|
