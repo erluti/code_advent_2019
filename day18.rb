@@ -37,11 +37,66 @@ class VaultMap
   end
 end
 
+class KeylessPathfinder
+  def initialize(map)
+    @map = map
+  end
+
+  def path(start, stop)
+    open_list = [{astar: 0, cost: 0, location: start, path: []}]
+    closed_list = []
+
+    while open_list.any?
+      current = open_list.min { |node| node[:astar] }
+      open_list.delete(current)
+
+      closed_list << current
+
+      if current[:location] == stop
+        return current[:path]
+      end
+
+      x, y = current[:location]
+      children = [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]].select do |point|
+        # false when it's a wall
+        case value = @map.location(point)
+        when '#'
+          false
+        # when 'A'..'Z'
+        #   # add more if there's an intervening door?
+        else
+          true
+        end
+      end
+      children.each do |child_location|
+        node = {path: current[:path] + [current[:location]], location: child_location}
+        next if closed_list.any?{|closed_node| closed_node[:location] == node[:location]}
+        node[:cost] = 1 + current[:cost]
+        node[:heuristic] = calculate_heuristic(child_location, stop)
+        node[:astar] = node[:cost] + node[:heuristic]
+
+        # if child is in the open_list's nodes positions and child cost is higher than the open_list node's cost skip it
+        next if open_list.any? { |open_node| open_node[:location] == node[:location] && open_node[:astar] < node[:astar] }
+
+        open_list << node
+      end
+    end
+  end
+
+  def calculate_heuristic(current_location, target)
+    # try sum of (straight-line) distance to all keys
+    x, y = current_location
+    target_x, target_y = target
+    Math.sqrt((x - target_x) ** 2 + (y - target_y) ** 2)
+  end
+end
+
 class Pathfinder # use A* algorithm to find shortest path
   def initialize(map)
     @map = map
     @location = @map.start
     @keys_to_get = @map.keys
+    @door_distances = {}
   end
 
   def path
@@ -69,9 +124,9 @@ class Pathfinder # use A* algorithm to find shortest path
       closed_list.add(current.dup)
 
       if (@keys_to_get - keys_collected).empty?
+        # p current[:path]
         return current[:path]
       end
-
 
       # let the children of the currentNode equal the adjacent nodes
       x, y = current[:location]
@@ -93,7 +148,7 @@ class Pathfinder # use A* algorithm to find shortest path
         node = {path: current[:path] + [current[:location]], location: child_location, keys_collected: keys_collected}
         next if closed_list.contains?(node)
         node[:cost] = 1 + current[:cost]
-        node[:heuristic] = calculate_heuristic(missing_keys, child_location)# * (1 + (missing_keys.count.to_f / @keys_to_get.count))
+        node[:heuristic] = calculate_heuristic_add_door_distance(missing_keys, child_location)
         node[:astar] = node[:cost] + node[:heuristic]
 
         # if child is in the open_list's nodes positions and child cost is higher than the open_list node's cost skip it
@@ -107,66 +162,30 @@ class Pathfinder # use A* algorithm to find shortest path
   # lower valued heuristics are choosen to traverse first
   # if it never overestimates the actual cost to get to the goal, it guarantees shortest path
   def calculate_heuristic(keys_to_get, current_location)
-    # try sum of (straight-line) distance to all keys
-    heuristic = 0
+    # sum of (straight-line) distance to all keys
     x, y = current_location
-    keys_to_get.each_with_index do |key, i|
+    keys_to_get.sum do |key|
+      next_x, next_y = @map.find(key)
+      Math.sqrt((x - next_x) ** 2 + (y - next_y) ** 2)
+    end
+  end
+
+  def calculate_heuristic_add_door_distance(keys_to_get, current_location)
+    # try sum of distance to all keys plus distance of keys to their doors
+    x, y = current_location
+    keys_to_get.sum do |key|
       next_x, next_y = @map.find(key)
       # a^2 + b^2 approximates distance from current_location
-      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / (1 + i) # dividing by this index factor prioritizes far away keys
+      Math.sqrt((x - next_x) ** 2 + (y - next_y) ** 2) + distance_to_door([next_x, next_y], key.upcase)
     end
-    heuristic
   end
 
-  def calculate_heuristic_avoid_doors(keys_to_get, current_location)
-    # try sum fo distance to all keys plus distance of keys to their doors (distance to door might need to be path distance)
-    heuristic = 0
-    x, y = current_location
-    keys_to_get.each_with_index do |key, i|
-      one_dex = i + 1
-      next_x, next_y = @map.find(key)
-      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) / one_dex
-      # avoid locked doors
-      bad_x, bad_y = @map.find(key.upcase)
-      next if bad_x == nil # no door for some keys
-      heuristic -= (((x - bad_x) ** 2 + (y - bad_y) ** 2) / one_dex) / 2 # better to avoid doors
-    end
-    heuristic
-  end
-
-  def calculate_heuristic_by_keys_away_from_doors(keys_to_get, current_location)
-    # pursue keys that are farther from their doors first
-    heuristic = 0
-    x, y = current_location
-    keys_to_get.sort! do |key1, key2|
-      door1 = @map.find(key1.upcase)
-      door2 = @map.find(key2.upcase)
-      if door1.nil?
-        if door2.nil?
-          # no doors, favor closer one
-          key1_loc = @map.find(key1)
-          key2_loc = @map.find(key2)
-          ((x - key1_loc.first) ** 2 + (y - key1_loc.last) ** 2) <=> ((x - key2_loc.first) ** 2 + (y - key2_loc.last) ** 2)
-        else
-          # key1 has no door, favor key2
-          1
-        end
-      else
-        if door2.nil?
-          # key2 has no door, favor key1
-          -1
-        else
-          # both have doors, favor key farthest from it's door
-          key1_loc = @map.find(key1)
-          key2_loc = @map.find(key2)
-          ((door1.first - key1_loc.first) ** 2 + (door1.last - key1_loc.last) ** 2) <=> ((door2.first - key2_loc.first) ** 2 + (door2.last - key2_loc.last) ** 2)
-        end
-      end
-    end.each_with_index do |key, i|
-      next_x, next_y = @map.find(key)
-      heuristic += ((x - next_x) ** 2 + (y - next_y) ** 2) * (i + 1)
-    end
-    heuristic
+  def distance_to_door(key, door)
+    # distance to door might need to be path distance
+    return @door_distances[door] if @door_distances[door]
+    door_location = @map.find(door)
+    return @door_distances[door] = 0 unless door_location
+    KeylessPathfinder.new(@map).path(key, door_location).count
   end
 end
 
