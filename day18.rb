@@ -122,6 +122,7 @@ class Pathfinder # use A* algorithm to find shortest path
   def path
     give_up = Time.now + GIVE_UP_SECONDS
     # initial algorithm from https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2
+    # helpful information https://en.wikipedia.org/wiki/A*_search_algorithm
     # Initialize both open and closed list
     open_list = NodeList.new
     open_list.add({astar: 0, cost: 0, location: @location, path: [], keys_collected: []})
